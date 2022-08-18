@@ -9,3 +9,18 @@ Description: Simplifies the application of various energy expenditure models.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    dplyr,
+    lubridate,
+    magrittr,
+    PAutilities,
+    randomForest,
+    rlang,
+    stats,
+    tidyr,
+    tree,
+    TwoRegression,
+    utils
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 2.10)
