@@ -1,0 +1,11 @@
+Package: accelEE
+Type: Package
+Title: Predict Energy Expenditure from Accelerometer Data
+Version: 0.1.0
+Authors@R: person(
+    c("Paul", "R."), "Hibbing", email = "paulhibbing@gmail.com",
+    role = c("aut","cre"))
+Description: Simplifies the application of various energy expenditure models.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
