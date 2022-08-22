@@ -41,8 +41,7 @@ hildebrand <- function(
     },
     .data = d, enmo_name = enmo_name, time_var = time_var,
     vo2_floor_mlkgmin = vo2_floor_mlkgmin, vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
-  ) %>%
-  dplyr::bind_cols(d, .)
+  )
 
 }
 

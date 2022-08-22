@@ -96,24 +96,20 @@ accelEE <- function(
   method %>%
   purrr::map_dfc(
     switch,
-    "Crouter 2006" = TwoRegression::TwoRegression(
-      d, "Crouter 2006", verbose, ...
-    ),
-    "Crouter 2010" = TwoRegression::TwoRegression(
-      d, "Crouter 2010", verbose, ...
-    ),
-    "Crouter 2012" = TwoRegression::TwoRegression(
-      d, "Crouter 2012", verbose, ...
-    ),
-    "Hibbing 2018" = TwoRegression::TwoRegression(
-      d, "Hibbing 2018", verbose, ...
-    ),
+    "Crouter 2006" = wrap_2RM(d, "Crouter 2006", verbose, ...),
+    "Crouter 2010" = wrap_2RM(d, "Crouter 2010", verbose, ...),
+    "Crouter 2012" = wrap_2RM(d, "Crouter 2012", verbose, ...),
+    "Hibbing 2018" = wrap_2RM(d, "Hibbing 2018", verbose, ...),
     "Hildebrand Linear" = hildebrand(d, ...),
     stop(
       "Invalid value passed for `method` argument:",
       " see ?args(accelEE::accelEE) for options",
       call. = FALSE
     )
+  ) %>%
+  dplyr::bind_cols(
+    dplyr::select(d, !dplyr::any_of(names(.))),
+    .
   )
 
 }
