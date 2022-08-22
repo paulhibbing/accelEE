@@ -14,13 +14,16 @@ Imports:
     lubridate,
     magrittr,
     PAutilities,
+    purrr,
     randomForest,
     rlang,
     stats,
     tidyr,
     tree,
-    TwoRegression,
+    TwoRegression (>= 1.0.0),
     utils
 RoxygenNote: 7.1.2
 Depends: 
     R (>= 2.10)
+Suggests: 
+    AGread (>= 1.3.0)
