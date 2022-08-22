@@ -8,13 +8,13 @@
 accelerometer data. The initial goal is to support predictions using the
 following methods:
 
-* Linear Hildebrand (see [2014](https://journals.lww.com/00005768-201409000-00017)
-  and [2017](https://onlinelibrary.wiley.com/doi/full/10.1111/sms.12795?casa_token=AwyG_FHPWcAAAAAA%3ADIO8s4EFVNUhOpyhEpmw9A7ccEZqvxARYjqSc6yD7prUEpEEECzPTMVmEOJkHem8y7YnpXrAkCoaicnc) publications by Hildebrand
+* Linear Hildebrand (see [2014](https://pubmed.ncbi.nlm.nih.gov/24887173/)
+  and [2017](https://pubmed.ncbi.nlm.nih.gov/27878845/) publications by Hildebrand
   et al.)
-* Non-Linear Hildebrand (see [Ellingson et al. (2017)](https://iopscience.iop.org/article/10.1088/1361-6579/aa6d00/meta))
-* Staudenmayer linear model and random forest (see [Staudenmayer et al. (2015)](https://journals.physiology.org/doi/full/10.1152/japplphysiol.00026.2015))
+* Non-Linear Hildebrand (see [Ellingson et al. (2017)](https://pubmed.ncbi.nlm.nih.gov/28481750/))
+* Staudenmayer linear model and random forest (see [Staudenmayer et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/26112238/))
 * Montoye neural networks (see [Montoye et al. (2017)](https://www.tandfonline.com/doi/abs/10.1080/1091367X.2017.1337638?journalCode=hmpe20))
-* Hibbing two-regression models (see [Hibbing et al. (2018)](https://journals.lww.com/acsm-msse/Fulltext/2018/05000/Estimating_Energy_Expenditure_with_ActiGraph_GT9X.24.aspx)
+* Hibbing two-regression models (see [Hibbing et al. (2018)](https://pubmed.ncbi.nlm.nih.gov/29271847/)
 and the [TwoRegression package](https://github.com/paulhibbing/TwoRegression))
 
 ## Installation
