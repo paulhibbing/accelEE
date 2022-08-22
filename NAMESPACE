@@ -3,4 +3,5 @@
 export(accelEE)
 import(TwoRegression)
 import(magrittr)
+import(nnet)
 importFrom(rlang,":=")

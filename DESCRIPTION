@@ -13,6 +13,7 @@ Imports:
     dplyr,
     lubridate,
     magrittr,
+    nnet,
     PAutilities (>= 1.1.0),
     purrr,
     randomForest,

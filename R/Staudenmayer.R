@@ -1,6 +1,6 @@
 # Retrieve features and predictions ---------------------------------------
 
-  predict_staudenmayer <- function(
+  staudenmayer_features <- function(
     AG, samp_freq = 80, win_width_sec = 15, time_var = "Timestamp",
     x_var = "Accelerometer_X", y_var = "Accelerometer_Y",
     z_var = "Accelerometer_Z"
@@ -15,12 +15,12 @@
     )} %>%
     dplyr::mutate(
       vm := sqrt(
-        !!as.name(x_var)^2 +
-        !!as.name(y_var)^2 +
-        !!as.name(z_var)^2
+        (!!as.name(x_var))^2 +
+        (!!as.name(y_var))^2 +
+        (!!as.name(z_var))^2
       ),
       v.ang = 90*(
-        asin(!!as.name(x_var)/vm)/(pi/2)
+        asin((!!as.name(x_var))/vm)/(pi/2)
       )
     ) %>%
     dplyr::group_by(grp = rep(
@@ -42,7 +42,13 @@
     ) %>%
     tidyr::unpack(powers) %>%
     dplyr::select(-grp) %>%
-    stats::setNames(., gsub("\\.v.ang", ".ang", names(.))) %>%
+    stats::setNames(., gsub("\\.v.ang", ".ang", names(.)))
+
+  }
+
+  predict_staudenmayer <- function(AG, get_features = TRUE) {
+    AG %>%
+    {if (get_features) staudenmayer_features(.) else .} %>%
     {within(., {
       METs_rf = ifelse(
         sd.vm < 0.01, 1, stats::predict(staudenmayer_rf, newdata = .)
@@ -51,8 +57,8 @@
         sd.vm < 0.01, 1, stats::predict(staudenmayer_lm, newdata = .)
       )
     })}
-
   }
+
 
 # Perform supporting computations -----------------------------------------
 

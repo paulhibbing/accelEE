@@ -35,7 +35,7 @@
 
 # Imports -----------------------------------------------------------------
 
-#' @import magrittr TwoRegression
+#' @import magrittr TwoRegression nnet
 NULL
 
 #' @importFrom rlang :=
