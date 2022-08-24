@@ -16,6 +16,9 @@
       "Staudenmayer Linear", "Staudenmayer Random Forest"
     ),
     verbose = FALSE,
+    feature_calc = TRUE,
+    output_epoch = "default",
+    time_var = "Timestamp",
     ...
   )
 
@@ -26,8 +29,9 @@
   hildebrand(
     d, age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
     location = c("hip", "wrist"), enmo_name = "ENMO",
-    time_var = "Timestamp", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
-    ...
+    time_var = "Timestamp", vo2_floor_mlkgmin = 3,
+    vo2_ceil_mlkgmin = 70, ..., feature_calc = TRUE,
+    output_epoch = "default"
   )
 }
 \arguments{
@@ -36,6 +40,17 @@
 \item{method}{the method(s) to use}
 
 \item{verbose}{logical. Print updates to console?}
+
+\item{feature_calc}{logical. Calculate features for the selected method(s)?
+If \code{FALSE}, the assumption is that features have already been
+calculated}
+
+\item{output_epoch}{character. The desired epoch length of output. Acceptable
+options are \code{"default"} or else a setting appropriate for the
+\code{unit} argument of \code{lubridate::floor_date()}}
+
+\item{time_var}{character. Name of the column containing
+POSIX-formatted timestamps}
 
 \item{...}{arguments passed to specific applicators. See details}
 
@@ -47,9 +62,6 @@
 
 \item{enmo_name}{name of the variable containing Euclidian Norm
 Minus One (ENMO) values}
-
-\item{time_var}{character. Name of the column containing
-POSIX-formatted timestamps}
 
 \item{vo2_floor_mlkgmin}{minimum allowable oxygen consumption value (in
 ml/kg/min). Values lower than this (if any) will be rounded up to it}
@@ -77,16 +89,22 @@ if (isTRUE(requireNamespace("AGread"))) {
 
   f <- system.file("extdata/example.gt3x", package = "AGread")
   AG <- AGread::read_gt3x(f, parser = "external")$RAW
-  AG <- suppressMessages(AGread::collapse_gt3x(AG))
+  collapsed <- suppressMessages(AGread::collapse_gt3x(AG))
 
   utils::head(
-    accelEE(AG, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
+    accelEE(collapsed, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
   )
 
   utils::head(
     accelEE(
-      AG, "Hildebrand Linear", age = "adult",
+      collapsed, "Hildebrand Linear", age = "adult",
       monitor = "ActiGraph", location = "Wrist"
+    )
+  )
+
+  utils::head(
+    accelEE(
+      AG, c("Staudenmayer Linear")
     )
   )
 

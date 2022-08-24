@@ -1,5 +1,30 @@
 # Retrieve features and predictions ---------------------------------------
 
+  #' Calculate features for Staudanmayer models
+  #'
+  #' @param AG data frame of ActiGraph data (raw samples)
+  #' @param samp_freq sampling frequency
+  #' @param win_width_sec desired window width for features (default is 15 sec)
+  #' @param time_var character. Name of the variable in \code{AG} containing
+  #'   POSIX-formatted timestamp information
+  #' @param x_var character. Name of the X-axis variable
+  #' @param y_var character. Name of the Y-axis variable
+  #' @param z_var character. Name of the Z-axis variable
+  #'
+  #' @return Data frame containing features in the specified format
+  #' @export
+  #'
+  #' @references \href{https://pubmed.ncbi.nlm.nih.gov/26112238/}{Staudenmayer et al. (2015)}
+  #'
+  #' @examples
+  #' if (isTRUE(requireNamespace("AGread"))) {
+  #'
+  #'   f <- system.file("extdata/example.gt3x", package = "AGread")
+  #'   AG <- AGread::read_gt3x(f, parser = "external")$RAW
+  #'
+  #'   head(staudenmayer_features(AG, 90))
+  #'
+  #' }
   staudenmayer_features <- function(
     AG, samp_freq = 80, win_width_sec = 15, time_var = "Timestamp",
     x_var = "Accelerometer_X", y_var = "Accelerometer_Y",
@@ -46,17 +71,26 @@
 
   }
 
-  predict_staudenmayer <- function(AG, get_features = TRUE) {
+  predict_staudenmayer <- function(
+    AG, get_features = TRUE, select = c("METs_lm", "METs_rf")
+  ) {
+
+    if (!isTRUE(requireNamespace("EE.Data", quietly = TRUE))) stop(
+      "You must install package `EE.Data` to use the",
+      " Staudenmayer method(s)", call. = FALSE
+    )
+
     AG %>%
     {if (get_features) staudenmayer_features(.) else .} %>%
     {within(., {
-      METs_rf = ifelse(
-        sd.vm < 0.01, 1, stats::predict(staudenmayer_rf, newdata = .)
+      if (METs_rf %in% select) METs_rf = ifelse(
+        sd.vm < 0.01, 1, stats::predict(EE.Data::staudenmayer_rf, newdata = .)
       )
-      METs_lm = ifelse(
-        sd.vm < 0.01, 1, stats::predict(staudenmayer_lm, newdata = .)
+      if (METs_lm %in% select) METs_lm = ifelse(
+        sd.vm < 0.01, 1, stats::predict(EE.Data::staudenmayer_lm, newdata = .)
       )
     })}
+
   }
 
 

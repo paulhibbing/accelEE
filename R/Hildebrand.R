@@ -2,46 +2,61 @@ hildebrand <- function(
   d, age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
   location = c("hip", "wrist"), enmo_name = "ENMO",
   time_var = "Timestamp", vo2_floor_mlkgmin = 3,
-  vo2_ceil_mlkgmin = 70, ...
+  vo2_ceil_mlkgmin = 70, ..., feature_calc = TRUE,
+  output_epoch = "default"
 ) {
 
   age %<>% hildebrand_input("age", c("youth", "adult"))
   monitor %<>% hildebrand_input("monitor", c("actigraph", "geneactiv"))
   location %<>% hildebrand_input("location", c("hip", "wrist"))
 
-  .hildebrand %>%
-  dplyr::filter(
-    tolower(.age) %in% age,
-    tolower(.monitor) %in% monitor,
-    tolower(.location) %in% location
-  ) %>%
-  split(., 1:nrow(.)) %>%
-  purrr::map_dfc(
-    function(
-      x, .data, enmo_name, time_var,
-      vo2_floor_mlkgmin, vo2_ceil_mlkgmin = 70
-    ) {
+  if (feature_calc) {
 
-      ## VO2 (ml/kg/min)
-      ifelse(
-        .data[[enmo_name]] <= x$cp,
-        vo2_floor_mlkgmin,
-        .data[[enmo_name]] * x$slope + x$intercept
-      ) %>%
-      pmin(vo2_ceil_mlkgmin = 70) %>%
+    d %<>% generic_features(time_var)
 
-      ## More variables
-      vo2_expand(
-        .data,
-        paste("hlm", x$.age, x$.monitor, x$.location, sep = "_"),
-        time_var
-      ) %>%
-      dplyr::select(!dplyr::all_of(time_var))
+  }
 
-    },
-    .data = d, enmo_name = enmo_name, time_var = time_var,
-    vo2_floor_mlkgmin = vo2_floor_mlkgmin, vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
-  )
+  results <-
+    .hildebrand %>%
+    dplyr::filter(
+      tolower(.age) %in% age,
+      tolower(.monitor) %in% monitor,
+      tolower(.location) %in% location
+    ) %>%
+    split(., 1:nrow(.)) %>%
+    purrr::map_dfc(
+      function(
+        x, .data, enmo_name, time_var,
+        vo2_floor_mlkgmin, vo2_ceil_mlkgmin = 70
+      ) {
+
+        ## VO2 (ml/kg/min)
+        ifelse(
+          .data[[enmo_name]] <= x$cp,
+          vo2_floor_mlkgmin,
+          .data[[enmo_name]] * x$slope + x$intercept
+        ) %>%
+        pmin(vo2_ceil_mlkgmin = 70) %>%
+
+        ## More variables
+        vo2_expand(
+          .data,
+          paste("hlm", x$.age, x$.monitor, x$.location, sep = "_"),
+          time_var
+        ) %>%
+        dplyr::select(!dplyr::all_of(time_var))
+
+      },
+      .data = d, enmo_name = enmo_name, time_var = time_var,
+      vo2_floor_mlkgmin = vo2_floor_mlkgmin,
+      vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
+    )
+
+  if (output_epoch == "default") {
+    results
+  } else {
+    collapse_EE(results, time_var, "default", output_epoch)
+  }
 
 }
 

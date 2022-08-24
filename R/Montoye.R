@@ -2,6 +2,24 @@ auto_cov <- function(x) stats::cov(
   utils::head(x, -1), utils::tail(x, -1)
 )
 
+#' Calculate features for Montoye's neural networks
+#'
+#' @inheritParams staudenmayer_features
+#'
+#' @return A dataframe of features for entry into the neural networks
+#' @export
+#'
+#' @references \href{https://www.tandfonline.com/doi/abs/10.1080/1091367X.2017.1337638?journalCode=hmpe20}{Montoye et al. (2017)}
+#'
+#' @examples
+#' if (isTRUE(requireNamespace("AGread"))) {
+#'
+#'   f <- system.file("extdata/example.gt3x", package = "AGread")
+#'   AG <- AGread::read_gt3x(f, parser = "external")$RAW
+#'
+#'   head(montoye_features(AG))
+#'
+#' }
 montoye_features <- function(
   AG, time_var = "Timestamp", x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y", z_var = "Accelerometer_Z"

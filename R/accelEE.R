@@ -14,6 +14,9 @@
 #'       "Staudenmayer Linear", "Staudenmayer Random Forest"
 #'     ),
 #'     verbose = FALSE,
+#'     feature_calc = TRUE,
+#'     output_epoch = "default",
+#'     time_var = "Timestamp",
 #'     ...
 #'   )
 #'
@@ -24,14 +27,21 @@
 #'   hildebrand(
 #'     d, age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
 #'     location = c("hip", "wrist"), enmo_name = "ENMO",
-#'     time_var = "Timestamp", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
-#'     ...
+#'     time_var = "Timestamp", vo2_floor_mlkgmin = 3,
+#'     vo2_ceil_mlkgmin = 70, ..., feature_calc = TRUE,
+#'     output_epoch = "default"
 #'   )
 #'
 #'
 #' @param d data frame of data to use for generating predictions
 #' @param method the method(s) to use
 #' @param verbose logical. Print updates to console?
+#' @param feature_calc logical. Calculate features for the selected method(s)?
+#'   If \code{FALSE}, the assumption is that features have already been
+#'   calculated
+#' @param output_epoch character. The desired epoch length of output. Acceptable
+#'   options are \code{"default"} or else a setting appropriate for the
+#'   \code{unit} argument of \code{lubridate::floor_date()}
 #' @param ... arguments passed to specific applicators. See details
 #' @param age the age group(s) of desired Hildebrand equation(s) to apply
 #' @param monitor the monitor being worn by the participant
@@ -64,16 +74,22 @@
 #'
 #'   f <- system.file("extdata/example.gt3x", package = "AGread")
 #'   AG <- AGread::read_gt3x(f, parser = "external")$RAW
-#'   AG <- suppressMessages(AGread::collapse_gt3x(AG))
+#'   collapsed <- suppressMessages(AGread::collapse_gt3x(AG))
 #'
 #'   utils::head(
-#'     accelEE(AG, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
+#'     accelEE(collapsed, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
 #'   )
 #'
 #'   utils::head(
 #'     accelEE(
-#'       AG, "Hildebrand Linear", age = "adult",
+#'       collapsed, "Hildebrand Linear", age = "adult",
 #'       monitor = "ActiGraph", location = "Wrist"
+#'     )
+#'   )
+#'
+#'   utils::head(
+#'     accelEE(
+#'       AG, c("Staudenmayer Linear")
 #'     )
 #'   )
 #'
@@ -90,17 +106,70 @@ accelEE <- function(
     "Staudenmayer Linear", "Staudenmayer Random Forest"
   ),
   verbose = FALSE,
+  feature_calc = TRUE,
+  output_epoch = "default",
+  time_var = "Timestamp",
   ...
 ) {
 
+  ## Accommodate piped AGread input
+  if (is.list(d) & exists("RAW", d)) {
+    if (isTRUE(
+      all.equal(class(d$RAW), c("RAW", "data.frame"))
+    )) {
+      d <- d$RAW
+    }
+    if (exists("IMU", d)) {
+      stop(
+        "IMU data detected in a separate list element from",
+        " RAW data. Please merge manually before",
+        " calling `accelEE`", call. = FALSE
+      )
+    }
+  }
+
+  ## Check on desired epoch length
+  if (output_epoch == "default" & length(method) > 1) {
+    AG %<>% compatible_epoch_check(method, time_var)
+  }
+
+  ## Apply the methods
   method %>%
+  c("Staudenmayer Both") %>%
+  {
+    if (!all(
+      c("Staudenmayer Linear", "Staudenmayer Random Forest") %in% .
+    )) {
+      setdiff(., "Staudenmayer Both")
+    } else {
+      setdiff(., c("Staudenmayer Linear", "Staudenmayer Random Forest"))
+    }
+  } %>%
   purrr::map_dfc(
     switch,
-    "Crouter 2006" = wrap_2RM(d, "Crouter 2006", verbose, ...),
-    "Crouter 2010" = wrap_2RM(d, "Crouter 2010", verbose, ...),
-    "Crouter 2012" = wrap_2RM(d, "Crouter 2012", verbose, ...),
-    "Hibbing 2018" = wrap_2RM(d, "Hibbing 2018", verbose, ...),
-    "Hildebrand Linear" = hildebrand(d, ...),
+    "Crouter 2006" = wrap_2RM(
+      d, "Crouter 2006", verbose, ..., feature_calc = feature_calc,
+      output_epoch = output_epoch, time_var = time_var
+    ),
+    "Crouter 2010" = wrap_2RM(
+      d, "Crouter 2010", verbose, ..., feature_calc = feature_calc,
+      output_epoch = output_epoch, time_var = time_var
+    ),
+    "Crouter 2012" = wrap_2RM(
+      d, "Crouter 2012", verbose, ..., feature_calc = feature_calc,
+      output_epoch = output_epoch, time_var = time_var
+    ),
+    "Hibbing 2018" = wrap_2RM(
+      d, "Hibbing 2018", verbose, ..., feature_calc = feature_calc,
+      output_epoch = output_epoch, time_var = time_var
+    ),
+    "Hildebrand Linear" = hildebrand(
+      d, ..., feature_calc = feature_calc,
+      output_epoch = output_epoch, time_var = time_var
+    ),
+    "Staudenmayer Linear" = predict_staudenmayer(d, TRUE, "METs_lm"),
+    "Staudenmayer Random Forest" = predict_staudenmayer(d, TRUE, "METs_rf"),
+    "Staudenmayer Both" = predict_staudenmayer(d, TRUE),
     stop(
       "Invalid value passed for `method` argument:",
       " see ?args(accelEE::accelEE) for options",

@@ -4,8 +4,8 @@
   #* General ####
 
     if(getRversion() >= "2.15.1") utils::globalVariables(c(
-      ".", ".age", "grp", ".location", "METs_lm", "METs_rf",
-      ".monitor", "n", "sd.vm", "vm", "X", "Y", "Z"
+      ".", "AG", ".age", "grp", ".location", "method", "METs_lm",
+      "METs_rf", ".monitor", "n", "sd.vm", "vm", "X", "Y", "Z"
     ))
 
 

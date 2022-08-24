@@ -23,7 +23,8 @@ vo2_expand <- function(vo2_mlkgmin, AG, tag, time_var = "Timestamp") {
 
 
 collapse_EE <- function(
-  AG, time_var, method = c("default", "TwoRegression"), ...
+  AG, time_var = "Timestamp", method = c("default", "TwoRegression"),
+  unit = "60 sec", ...
 ) {
 
   method <- match.arg(method)
@@ -32,30 +33,32 @@ collapse_EE <- function(
     return(TwoRegression::smooth_2rm(AG, time_var, ...))
   }
 
+  expected <- unit_to_sec(unit)
+
   AG %>%
   dplyr::group_by(
-    !!as.name(time_var) := lubridate::floor_date(!!as.name(time_var), "1 min")
+    !!as.name(time_var) := lubridate::floor_date(!!as.name(time_var), unit)
   ) %>%
   dplyr::summarise(
     dplyr::across(.fns = mean),
     n = dplyr::n()
   ) %T>%
-  {if (sum(.$n != 60)>1) {
+  {if (sum(.$n != expected)>1) {
     warning(
-      "Removing ", sum(.$n != 60),
-      " incomplete minute(s) from a file starting ",
+      "Removing ", sum(.$n != expected),
+      " incomplete epoch(s) from a file starting ",
       as.Date(.[1, time_var]), call. = FALSE
     )
   }} %>%
-  dplyr::filter(n == 60) %>%
+  dplyr::filter(n == expected) %>%
   dplyr::select(-n) %>%
-  {check_continuous(., time_var)} %>%
+  {check_continuous(., time_var, expected)} %>%
   data.frame(stringsAsFactors = FALSE)
 
 }
 
 
-check_continuous <- function(AG, time_var) {
+check_continuous <- function(AG, time_var, expected) {
 
   mapply(
     difftime,
@@ -64,7 +67,7 @@ check_continuous <- function(AG, time_var) {
     MoreArgs = list(units = "sec"),
     USE.NAMES = FALSE
   ) %>%
-  {if (any(. != 60)) stop(
+  {if (any(. != expected)) stop(
     "Discontinuity detected in file",
     call. = FALSE
   )}
