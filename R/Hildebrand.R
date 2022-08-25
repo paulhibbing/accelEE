@@ -29,11 +29,12 @@ hildebrand_linear <- function(
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var)
+    d %<>% generic_features(time_var, verbose)
 
   }
 
   results <-
+
     .hildebrand %>%
     dplyr::filter(
       tolower(.age) %in% age,
@@ -41,7 +42,9 @@ hildebrand_linear <- function(
       tolower(.location) %in% location
     ) %>%
     split(., 1:nrow(.)) %>%
-    purrr::map_dfc(
+
+    lapply(
+
       function(
         x, .data, enmo_name, time_var,
         vo2_floor_mlkgmin, vo2_ceil_mlkgmin
@@ -53,20 +56,27 @@ hildebrand_linear <- function(
           vo2_floor_mlkgmin,
           .data[[enmo_name]] * x$slope + x$intercept
         ) %>%
-        pmin(vo2_ceil_mlkgmin) %>%
 
         ## More variables
         vo2_expand(
           .data,
-          paste("hlm", x$.age, x$.monitor, x$.location, sep = "_"),
-          time_var
+          paste("hildebrand_linear", x$.age, x$.monitor, x$.location, sep = "_"),
+          time_var,
+          vo2_floor_mlkgmin,
+          vo2_ceil_mlkgmin
         )
 
       },
+
       .data = d, enmo_name = enmo_name, time_var = time_var,
       vo2_floor_mlkgmin = vo2_floor_mlkgmin,
       vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
-    )
+
+    ) %>%
+
+    c(.name_repair = "minimal") %>%
+    do.call(dplyr::bind_cols, .) %>%
+    df_unique(.)
 
   if (use_default) return(results)
 
@@ -100,7 +110,7 @@ hildebrand_nonlinear <- function(
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var)
+    d %<>% generic_features(time_var, verbose)
 
   }
 
@@ -110,7 +120,7 @@ hildebrand_nonlinear <- function(
     {0.901 * .} %>%
     pmax(vo2_floor_mlkgmin) %>%
     pmin(vo2_ceil_mlkgmin) %>%
-    vo2_expand(d, "hnlm")
+    vo2_expand(d, "hildebrand_nonlinear")
 
   if (use_default) return(results)
 

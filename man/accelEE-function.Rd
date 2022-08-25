@@ -3,7 +3,10 @@
 \name{accelEE-function}
 \alias{accelEE-function}
 \alias{accelEE}
-\alias{hildebrand}
+\alias{hildebrand_linear}
+\alias{hildebrand_nonlinear}
+\alias{staudenmayer}
+\alias{wrap_2RM}
 \title{Predict energy expenditure for accelerometry data}
 \usage{
 ## Wrapper function:
@@ -14,24 +17,42 @@
       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
       "Staudenmayer Linear", "Staudenmayer Random Forest"
-    ),
-    verbose = FALSE,
-    feature_calc = TRUE,
-    output_epoch = "default",
-    time_var = "Timestamp",
-    ...
+    ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", combine = TRUE, ...
   )
+
 
 ## Internal applicator functions that the wrapper calls based on
 ## the value of the `method` argument (external functions listed
 ## under 'See Also'):
 
-  hildebrand(
-    d, age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
-    location = c("hip", "wrist"), enmo_name = "ENMO",
-    time_var = "Timestamp", vo2_floor_mlkgmin = 3,
-    vo2_ceil_mlkgmin = 70, ..., feature_calc = TRUE,
-    output_epoch = "default"
+  wrap_2RM(
+    d,
+    method = c(
+      "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
+    ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", tag = "", met_name = "METs", max_mets = 20,
+    met_mlkgmin = 3.5, RER = 0.85, ...
+  )
+
+  hildebrand_linear(
+    d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", age = c("youth", "adult"),
+    monitor = c("ActiGraph", "GENEActiv"), location = c("hip", "wrist"),
+    enmo_name = "ENMO", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
+    ...
+  )
+
+  hildebrand_nonlinear(
+    d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
+    vo2_ceil_mlkgmin = 70, ...
+  )
+
+  staudenmayer(
+    d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", select = c("METs_lm", "METs_rf"),
+    min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
   )
 }
 \arguments{
@@ -52,7 +73,18 @@ options are \code{"default"} or else a setting appropriate for the
 \item{time_var}{character. Name of the column containing
 POSIX-formatted timestamps}
 
-\item{...}{arguments passed to specific applicators. See details}
+\item{combine}{logical. Combine results from each method into a single
+data frame? If \code{TRUE} (the default), the results will all be collapsed
+to a commonly-compatible epoch length, which may override
+\code{output_epoch} if a suitable selection is not given}
+
+\item{...}{arguments passed to specific applicators and beyond. See details}
+
+\item{tag}{A character scalar giving an informative tag to add when naming
+variables, to ensure disambiguation (primarily for internal use)}
+
+\item{met_name}{character. The name of the column containing metabolic
+equivalent values (METs)}
 
 \item{age}{the age group(s) of desired Hildebrand equation(s) to apply}
 
@@ -63,11 +95,26 @@ POSIX-formatted timestamps}
 \item{enmo_name}{name of the variable containing Euclidian Norm
 Minus One (ENMO) values}
 
+\item{min_mets}{minimum allowable metabolic equivalent (MET) value. Values
+lower than this (if any) will be rounded up to it}
+
 \item{vo2_floor_mlkgmin}{minimum allowable oxygen consumption value (in
 ml/kg/min). Values lower than this (if any) will be rounded up to it}
 
+\item{max_mets}{maximum allowable metabolic equivalent (MET) value. Values
+higher than this (if any) will be rounded down to it}
+
 \item{vo2_ceil_mlkgmin}{maximum allowable oxygen consumption value (in
-ml/kg/min). Values larger than this (if any) will be rounded down to it}
+ml/kg/min). Values higher than this (if any) will be rounded down to it}
+
+\item{met_mlkgmin}{conversion factor for transforming oxygen consumption (in
+ml/kg/min) into metabolic equivalents (METs)}
+
+\item{RER}{the respiratory exchange ratio. Used for determining conversion
+factors when calculating caloric expenditure from oxygen consumption}
+
+\item{select}{for internal use in functions related to
+\code{Staudenmayer} methods}
 }
 \value{
 A data frame appended with new columns containing energy
@@ -83,33 +130,55 @@ This is a wrapper and aggregator for applying different energy
   method). Most applicators require values to be passed in for additional
   variables. Thus, the signature for each applicator function is included
   above, in the \code{usage section}.
+
+  For \code{TwoRegression} methods, a customized internal wrapper
+  (\code{wrap_2RM}) is used around \code{\link[TwoRegression]{TwoRegression}}.
+
+  For \code{Staudenmayer} methods, values can be passed directly to
+  \code{\link{staudenmayer_features}} if feature calculation is requested via
+  the \code{feature_calc} argument.
+}
+\note{
+Oxygen consumption values are converted to kcal using factors from the
+  Lusk table (by default, 4.862 kcal/L, corresponding to RER of 0.85).
+  Caloric expenditure values are converted to metabolic equivalents (METs)
+  assuming 1 MET = 1 kcal/kg/h.
+
+  On another note, not all methods may be able to be combined through a
+  single call. This capability is dependent on the desired settings and
+  format of the output. There are too many possibilities and contingencies to
+  list in a single documentation file, but discussion are welcome on
+  \href{https://github.com/paulhibbing/accelEE/issues}{GitHub}.
 }
 \examples{
 if (isTRUE(requireNamespace("AGread"))) {
 
   f <- system.file("extdata/example.gt3x", package = "AGread")
   AG <- AGread::read_gt3x(f, parser = "external")$RAW
-  collapsed <- suppressMessages(AGread::collapse_gt3x(AG))
 
   utils::head(
-    accelEE(collapsed, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
+    accelEE(AG, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
   )
 
   utils::head(
     accelEE(
-      collapsed, "Hildebrand Linear", age = "adult",
+      AG, c("Hildebrand Linear", "Hildebrand Non-Linear"), age = "adult",
       monitor = "ActiGraph", location = "Wrist"
     )
   )
 
   utils::head(
-    accelEE(
-      AG, c("Staudenmayer Linear")
-    )
+    accelEE(AG, "Staudenmayer Random Forest")
+    ##^Not using "Staudenmayer Linear" because a warning populates
+    ## about low values being rounded up
   )
 
 }
 
+}
+\references{
+Lusk, G. (1924). Analysis of the oxidation of mixtures of carbohydrate and
+fat: a correction. \emph{Journal of Biological Chemistry}, 59, 41-42.
 }
 \seealso{
 \code{\link[TwoRegression]{TwoRegression}}

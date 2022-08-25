@@ -1,4 +1,60 @@
-vo2_expand <- function(vo2_mlkgmin, d, tag, time_var = "Timestamp") {
+met_expand <- function(
+  d, met_name, tag, met_mlkgmin = 3.5,
+  min_mets = 1, max_mets = 20, RER = 0.85
+) {
+
+  d %>%
+
+  dplyr::rename_with(
+    function(x, met_name, tag) {
+      gsub(met_name, "", x) %>%
+      paste0(tag, "_METs_", .)
+    },
+    dplyr::matches(met_name),
+    met_name = met_name,
+    tag = tag
+  )  %>%
+
+  stats::setNames(., gsub("[_.-]+", "_", names(.))) %>%
+
+  dplyr::mutate(
+
+    dplyr::across(
+      dplyr::contains("METs"),
+      check_values,
+      minimum = min_mets, maximum = max_mets,
+      label = gsub("[\\._\\-]+", "", tag),
+      variable = "MET", units = "MET(s)"
+    ),
+
+    dplyr::across(
+      dplyr::contains("METs"),
+      ~.x * met_mlkgmin,
+      .names = "{gsub(\"METs\", \"vo2_mlkgmin\", .col)}"
+    ),
+
+    dplyr::across(
+      dplyr::contains("vo2_mlkgmin"),
+      ~ .x / 1000 * PAutilities::get_kcal_vo2_conversion(RER, "Lusk"),
+      .names = "{gsub(\"vo2_mlkgmin\", \"kcal_kgmin\", .col)}"
+    )
+
+  ) %>%
+
+  stats::setNames(., gsub("_+$", "", names(.)))
+
+}
+
+
+vo2_expand <- function(
+  vo2_mlkgmin, d, tag, time_var = "Timestamp",
+  vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70
+) {
+
+  vo2_mlkgmin %<>% check_values(
+    vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
+    gsub("[_-.]+", "", tag), "VO2", "ml/kg/min"
+  )
 
   vo2_L_kgmin <- vo2_mlkgmin / 1000
 
@@ -66,19 +122,21 @@ join_EE <- function(d, ee_values) {
 
   rows <-
     sapply(ee_values, nrow) %>%
-    unique(.) %T>%
+    unique(.) %>%
+    c(nrow(d)) %T>%
     {stopifnot(
-      length(.) == 1,
-      abs(. - nrow(d)) <= 1
+      diff(range(.)) <= 1
     )} %>%
-    pmin(nrow(AG)) %>%
+    min(.) %>%
     seq(.)
 
 
-  do.call(cbind, ee_values) %>%
+  ee_values %>%
+  lapply(dplyr::slice, rows) %>%
+  c(.name_repair = "minimal") %>%
+  do.call(dplyr::bind_cols, .) %>%
   df_unique(.) %>%
   dplyr::select(!dplyr::any_of(names(d))) %>%
-  dplyr::slice(rows) %>%
   dplyr::bind_cols(
     dplyr::slice(d, rows),
     .

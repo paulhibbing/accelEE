@@ -5,23 +5,24 @@
 \title{Calculate features for Staudanmayer models}
 \usage{
 staudenmayer_features(
-  AG,
+  d,
   samp_freq = 80,
   win_width_sec = 15,
   time_var = "Timestamp",
   x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y",
-  z_var = "Accelerometer_Z"
+  z_var = "Accelerometer_Z",
+  ...
 )
 }
 \arguments{
-\item{AG}{data frame of ActiGraph data (raw samples)}
+\item{d}{data frame of ActiGraph data (raw samples)}
 
 \item{samp_freq}{sampling frequency}
 
 \item{win_width_sec}{desired window width for features (default is 15 sec)}
 
-\item{time_var}{character. Name of the variable in \code{AG} containing
+\item{time_var}{character. Name of the variable in \code{d} containing
 POSIX-formatted timestamp information}
 
 \item{x_var}{character. Name of the X-axis variable}
@@ -29,6 +30,8 @@ POSIX-formatted timestamp information}
 \item{y_var}{character. Name of the Y-axis variable}
 
 \item{z_var}{character. Name of the Z-axis variable}
+
+\item{...}{currently unused}
 }
 \value{
 Data frame containing features in the specified format
@@ -40,9 +43,9 @@ Calculate features for Staudanmayer models
 if (isTRUE(requireNamespace("AGread"))) {
 
   f <- system.file("extdata/example.gt3x", package = "AGread")
-  AG <- AGread::read_gt3x(f, parser = "external")$RAW
+  d <- AGread::read_gt3x(f, parser = "external")$RAW
 
-  head(staudenmayer_features(AG, 90))
+  head(staudenmayer_features(d, 90))
 
 }
 }

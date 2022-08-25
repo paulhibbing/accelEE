@@ -4,19 +4,26 @@
 \alias{generic_features}
 \title{Calculate generic features for model application}
 \usage{
-generic_features(AG, time_var = "Timestamp", verbose = FALSE)
+generic_features(
+  d,
+  time_var = "Timestamp",
+  verbose = FALSE,
+  output_window_secs = 1
+)
 }
 \arguments{
-\item{AG}{data frame of ActiGraph data (other monitors not currently
+\item{d}{data frame of ActiGraph data (other monitors not currently
 supported)}
 
-\item{time_var}{character. Name of the column in \code{AG} containing
+\item{time_var}{character. Name of the column in \code{d} containing
 POSIX-formatted timestamp information}
 
 \item{verbose}{logical. Print updates to console?}
+
+\item{output_window_secs}{The desired epoch length (in seconds) for output}
 }
 \value{
-A data frame of features in one-second epochs
+A data frame of features in the specified epoch length
 }
 \description{
 This is a loose wrapper around \code{AGread::collapse_gt3x}
@@ -29,9 +36,9 @@ Currently, input is only accepted for raw ActiGraph accelerometer data
 if (isTRUE(requireNamespace("AGread"))) {
 
   f <- system.file("extdata/example.gt3x", package = "AGread")
-  AG <- AGread::read_gt3x(f, parser = "external")$RAW
+  d <- AGread::read_gt3x(f, parser = "external")$RAW
 
-  head(generic_features(AG))
+  utils::head(generic_features(d))
 
 }
 }
