@@ -9,7 +9,9 @@ wrap_2RM <- function(
   time_var = "Timestamp",
   tag = "",
   met_name = "METs",
-  vo2_ceil_mlkgmin = 70,
+  max_mets = 20,
+  met_mlkgmin = 3.5,
+  RER = 0.85,
   ...
 ) {
 
@@ -25,43 +27,24 @@ wrap_2RM <- function(
   ## to Hibbing method (and only for the non-IMU models)
   if (feature_calc & "Hibbing 2018" %in% method) {
 
-    d %<>% generic_features(time_var, verbose, unit_to_sec(output_epoch))
+    d %<>% generic_features(time_var, verbose)
 
   }
 
 
   ## Get initial results
   results <-
-    TwoRegression::TwoRegression(d, method, verbose, ...) %>%
+    TwoRegression::TwoRegression(
+      d, method, verbose = FALSE,
+      time_var = time_var, ...
+    ) %>%
     dplyr::select(
       dplyr::all_of(time_var),
       dplyr::any_of(c("ENMO", "GVM", "Direction")),
       dplyr::matches("CV10s"),
       dplyr::matches(met_name)
     ) %>%
-    dplyr::rename_with(
-      function(x, met_name, tag) {
-        gsub(met_name, "", x) %>%
-        paste0(tag, "_METs_", .)
-      },
-      dplyr::matches(met_name),
-      met_name = met_name,
-      tag = tag
-    )  %>%
-    stats::setNames(., gsub("[_.-]+", "_", names(.))) %>%
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::contains("METs"),
-        ~ {.x * 3.5} %>% pmin(vo2_ceil_mlkgmin),
-        .names = "{gsub(\"METs\", \"vo2_mlkgmin\", .col)}"
-      ),
-      dplyr::across(
-        dplyr::contains("vo2_mlkgmin"),
-        ~ .x / 1000 * PAutilities::get_kcal_vo2_conversion(0.85, "Lusk"),
-        .names = "{gsub(\"vo2_mlkgmin\", \"kcal_kgmin\", .col)}"
-      )
-    ) %>%
-    stats::setNames(., gsub("_+$", "", names(.)))
+    met_expand(met_name, tag, met_mlkgmin, -Inf, max_mets, RER)
 
 
   ## Process further if desired
