@@ -65,6 +65,11 @@ generic_features <- function(
 # Internal ----------------------------------------------------------------
 
 
+auto_cov <- function(x) stats::cov(
+  utils::head(x, -1), utils::tail(x, -1)
+)
+
+
 check_data_format <- function(d) {
 
   if (is.list(d) & exists("RAW", d)) {

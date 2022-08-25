@@ -30,6 +30,11 @@ check_values <- function(
     variable <- match.arg(variable)
     units <- match.arg(units)
 
+    if (is.matrix(x)) {
+      stopifnot(ncol(x) == 1)
+      x %<>% as.vector(.)
+    }
+
 
   ## Check for low values
 

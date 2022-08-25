@@ -7,6 +7,7 @@
 \alias{hildebrand_nonlinear}
 \alias{staudenmayer}
 \alias{wrap_2RM}
+\alias{montoye}
 \title{Predict energy expenditure for accelerometry data}
 \usage{
 ## Wrapper function:
@@ -47,6 +48,13 @@
     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
     time_var = "Timestamp", enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
     vo2_ceil_mlkgmin = 70, ...
+  )
+
+  montoye(
+    d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+    time_var = "Timestamp", side = c("left", "right"),
+    min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
+    shrink_output = TRUE, ...
   )
 
   staudenmayer(
@@ -113,6 +121,14 @@ ml/kg/min) into metabolic equivalents (METs)}
 \item{RER}{the respiratory exchange ratio. Used for determining conversion
 factors when calculating caloric expenditure from oxygen consumption}
 
+\item{side}{character vector or scalar indicating which side-specific wrist
+model(s) to implement. Can be \code{"left"}, \code{"right"}, or
+\code{c("left", "right")}}
+
+\item{shrink_output}{logical. Reduce the number of columns in output by
+removing calculated feature columns? Currently applies to \code{Montoye}
+methods only}
+
 \item{select}{for internal use in functions related to
 \code{Staudenmayer} methods}
 }
@@ -134,9 +150,10 @@ This is a wrapper and aggregator for applying different energy
   For \code{TwoRegression} methods, a customized internal wrapper
   (\code{wrap_2RM}) is used around \code{\link[TwoRegression]{TwoRegression}}.
 
-  For \code{Staudenmayer} methods, values can be passed directly to
-  \code{\link{staudenmayer_features}} if feature calculation is requested via
-  the \code{feature_calc} argument.
+  For \code{Staudenmayer} and \code{Montoye} methods, values can be passed
+  directly to \code{\link{staudenmayer_features}} and
+  \code{\link{montoye_features}}, respectively (if feature calculation is
+  requested via the \code{feature_calc} argument).
 }
 \note{
 Oxygen consumption values are converted to kcal using factors from the
@@ -164,6 +181,12 @@ if (isTRUE(requireNamespace("AGread"))) {
     accelEE(
       AG, c("Hildebrand Linear", "Hildebrand Non-Linear"), age = "adult",
       monitor = "ActiGraph", location = "Wrist"
+    )
+  )
+
+  utils::head(
+    accelEE(
+      AG, "Montoye 2017", side = "left"
     )
   )
 

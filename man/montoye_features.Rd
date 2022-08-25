@@ -5,24 +5,32 @@
 \title{Calculate features for Montoye's neural networks}
 \usage{
 montoye_features(
-  AG,
+  d,
   time_var = "Timestamp",
+  side = c("left", "right"),
   x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y",
-  z_var = "Accelerometer_Z"
+  z_var = "Accelerometer_Z",
+  ...
 )
 }
 \arguments{
-\item{AG}{data frame of ActiGraph data (raw samples)}
+\item{d}{data frame of ActiGraph data (raw samples)}
 
-\item{time_var}{character. Name of the variable in \code{AG} containing
+\item{time_var}{character. Name of the variable in \code{d} containing
 POSIX-formatted timestamp information}
+
+\item{side}{character vector or scalar indicating which side-specific wrist
+model(s) to implement. Can be \code{"left"}, \code{"right"}, or
+\code{c("left", "right")}}
 
 \item{x_var}{character. Name of the X-axis variable}
 
 \item{y_var}{character. Name of the Y-axis variable}
 
 \item{z_var}{character. Name of the Z-axis variable}
+
+\item{...}{currently unused}
 }
 \value{
 A dataframe of features for entry into the neural networks
@@ -34,9 +42,9 @@ Calculate features for Montoye's neural networks
 if (isTRUE(requireNamespace("AGread"))) {
 
   f <- system.file("extdata/example.gt3x", package = "AGread")
-  AG <- AGread::read_gt3x(f, parser = "external")$RAW
+  d <- AGread::read_gt3x(f, parser = "external")$RAW
 
-  head(montoye_features(AG))
+  head(montoye_features(d))
 
 }
 }

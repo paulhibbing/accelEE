@@ -1,5 +1,5 @@
 #' Predict energy expenditure for accelerometry data
-#' @aliases hildebrand_linear hildebrand_nonlinear staudenmayer wrap_2RM
+#' @aliases hildebrand_linear hildebrand_nonlinear staudenmayer wrap_2RM montoye
 #'
 #'
 #' @usage
@@ -43,6 +43,13 @@
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
 #'     time_var = "Timestamp", enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
 #'     vo2_ceil_mlkgmin = 70, ...
+#'   )
+#'
+#'   montoye(
+#'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
+#'     time_var = "Timestamp", side = c("left", "right"),
+#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
+#'     shrink_output = TRUE, ...
 #'   )
 #'
 #'   staudenmayer(
@@ -89,6 +96,12 @@
 #'   ml/kg/min) into metabolic equivalents (METs)
 #' @param RER the respiratory exchange ratio. Used for determining conversion
 #'   factors when calculating caloric expenditure from oxygen consumption
+#' @param side character vector or scalar indicating which side-specific wrist
+#'   model(s) to implement. Can be \code{"left"}, \code{"right"}, or
+#'   \code{c("left", "right")}
+#' @param shrink_output logical. Reduce the number of columns in output by
+#'   removing calculated feature columns? Currently applies to \code{Montoye}
+#'   methods only
 #' @param select for internal use in functions related to
 #'   \code{Staudenmayer} methods
 #'
@@ -102,9 +115,10 @@
 #'   For \code{TwoRegression} methods, a customized internal wrapper
 #'   (\code{wrap_2RM}) is used around \code{\link[TwoRegression]{TwoRegression}}.
 #'
-#'   For \code{Staudenmayer} methods, values can be passed directly to
-#'   \code{\link{staudenmayer_features}} if feature calculation is requested via
-#'   the \code{feature_calc} argument.
+#'   For \code{Staudenmayer} and \code{Montoye} methods, values can be passed
+#'   directly to \code{\link{staudenmayer_features}} and
+#'   \code{\link{montoye_features}}, respectively (if feature calculation is
+#'   requested via the \code{feature_calc} argument).
 #'
 #' @return A data frame appended with new columns containing energy
 #'     expenditure predictions
@@ -143,6 +157,12 @@
 #'     accelEE(
 #'       AG, c("Hildebrand Linear", "Hildebrand Non-Linear"), age = "adult",
 #'       monitor = "ActiGraph", location = "Wrist"
+#'     )
+#'   )
+#'
+#'   utils::head(
+#'     accelEE(
+#'       AG, "Montoye 2017", side = "left"
 #'     )
 #'   )
 #'
@@ -213,13 +233,17 @@ accelEE <- function(
         d, verbose, feature_calc,
         output_epoch, time_var, ...
       ),
+      "Montoye 2017" = montoye(
+        d, verbose, feature_calc,
+        output_epoch, time_var,  ...
+      ),
       "Staudenmayer Linear" = staudenmayer(
         d, verbose, feature_calc,
         output_epoch, time_var, "METs_lm", ...
       ),
       "Staudenmayer Random Forest" = staudenmayer(
         d, verbose, feature_calc,
-        output_epoch, time_var, "METs_lm", ...
+        output_epoch, time_var, "METs_rf", ...
       ),
       "Staudenmayer Both" = staudenmayer(
         d, verbose, feature_calc,
