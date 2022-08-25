@@ -1,10 +1,27 @@
-hildebrand <- function(
-  d, age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
-  location = c("hip", "wrist"), enmo_name = "ENMO",
-  time_var = "Timestamp", vo2_floor_mlkgmin = 3,
-  vo2_ceil_mlkgmin = 70, ..., feature_calc = TRUE,
-  output_epoch = "default"
+# Linear ------------------------------------------------------------------
+
+hildebrand_linear <- function(
+  d,
+  verbose = FALSE,
+  feature_calc = TRUE,
+  output_epoch = "default",
+  time_var = "Timestamp",
+  age = c("youth", "adult"),
+  monitor = c("ActiGraph", "GENEActiv"),
+  location = c("hip", "wrist"),
+  enmo_name = "ENMO",
+  vo2_floor_mlkgmin = 3,
+  vo2_ceil_mlkgmin = 70,
+  ...
 ) {
+
+  if (verbose) cat(
+    "\n...Getting predictions for the",
+    " Hildebrand linear method"
+  )
+
+  use_default <- is_default(output_epoch)
+  if (use_default) output_epoch <- "1 sec"
 
   age %<>% hildebrand_input("age", c("youth", "adult"))
   monitor %<>% hildebrand_input("monitor", c("actigraph", "geneactiv"))
@@ -27,7 +44,7 @@ hildebrand <- function(
     purrr::map_dfc(
       function(
         x, .data, enmo_name, time_var,
-        vo2_floor_mlkgmin, vo2_ceil_mlkgmin = 70
+        vo2_floor_mlkgmin, vo2_ceil_mlkgmin
       ) {
 
         ## VO2 (ml/kg/min)
@@ -36,15 +53,14 @@ hildebrand <- function(
           vo2_floor_mlkgmin,
           .data[[enmo_name]] * x$slope + x$intercept
         ) %>%
-        pmin(vo2_ceil_mlkgmin = 70) %>%
+        pmin(vo2_ceil_mlkgmin) %>%
 
         ## More variables
         vo2_expand(
           .data,
           paste("hlm", x$.age, x$.monitor, x$.location, sep = "_"),
           time_var
-        ) %>%
-        dplyr::select(!dplyr::all_of(time_var))
+        )
 
       },
       .data = d, enmo_name = enmo_name, time_var = time_var,
@@ -52,13 +68,58 @@ hildebrand <- function(
       vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
     )
 
-  if (output_epoch == "default") {
-    results
-  } else {
-    collapse_EE(results, time_var, "default", output_epoch)
-  }
+  if (use_default) return(results)
+
+  collapse_EE(results, time_var, output_epoch, verbose)
 
 }
+
+
+# Non-Linear --------------------------------------------------------------
+
+hildebrand_nonlinear <- function(
+  d,
+  verbose = FALSE,
+  feature_calc = TRUE,
+  output_epoch = "default",
+  time_var = "Timestamp",
+  enmo_name = "ENMO",
+  vo2_floor_mlkgmin = 3,
+  vo2_ceil_mlkgmin = 70,
+  ...
+) {
+
+  if (verbose) cat(
+    "\n...Getting predictions for the",
+    " Hildebrand non-linear method"
+  )
+
+  use_default <- is_default(output_epoch)
+
+  if (use_default) output_epoch <- "1 sec"
+
+  if (feature_calc) {
+
+    d %<>% generic_features(time_var)
+
+  }
+
+  results <-
+    d[[enmo_name]] %>%
+    {. ^ .534} %>%
+    {0.901 * .} %>%
+    pmax(vo2_floor_mlkgmin) %>%
+    pmin(vo2_ceil_mlkgmin) %>%
+    vo2_expand(d, "hnlm")
+
+  if (use_default) return(results)
+
+  collapse_EE(results, time_var, output_epoch, verbose)
+
+}
+
+
+# Helper ------------------------------------------------------------------
 
 hildebrand_input <- function(value, arg, choices) {
 
@@ -88,18 +149,5 @@ hildebrand_input <- function(value, arg, choices) {
   }
 
   value
-
-}
-
-hnlm <- function(AG) {
-
-  ## VO2 (ml/kg/min)
-  {AG$ENMO ^ .534} %>%
-  {0.901 * .} %>%
-  pmax(3, .) %>%
-  pmin(70) %>%
-
-  ## More variables
-  vo2_expand(AG, "hnlm")
 
 }

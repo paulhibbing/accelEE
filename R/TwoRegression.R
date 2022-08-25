@@ -1,28 +1,48 @@
 wrap_2RM <- function(
-  AG, method = c(
+  d,
+  method = c(
     "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
-  ), verbose = FALSE, ..., tag = "", met_name = "METs",
-  vo2_ceil_mlkgmin = 70, feature_calc = TRUE, output_epoch = "default",
-  time_var = "Timestamp"
+  ),
+  verbose = FALSE,
+  feature_calc = TRUE,
+  output_epoch = "default",
+  time_var = "Timestamp",
+  tag = "",
+  met_name = "METs",
+  vo2_ceil_mlkgmin = 70,
+  ...
 ) {
 
-  method <- match.arg(method)
 
-  ## Calculate features if possible (currently applies to Hibbing method only)
+  ## Setup
+  method <- match.arg(method)
+  if (verbose) cat("\n...Getting predictions for", method, "method")
+  use_default <- is_default(output_epoch)
+  if (use_default) output_epoch <- "1 sec"
+
+
+  ## Automated feature calculation currently only applies
+  ## to Hibbing method (and only for the non-IMU models)
   if (feature_calc & "Hibbing 2018" %in% method) {
 
-    AG %<>% generic_features(time_var)
+    d %<>% generic_features(time_var, verbose, unit_to_sec(output_epoch))
 
   }
 
+
   ## Get initial results
   results <-
-    TwoRegression::TwoRegression(AG, method, verbose, ...) %>%
-    dplyr::select(dplyr::matches(met_name)) %>%
+    TwoRegression::TwoRegression(d, method, verbose, ...) %>%
+    dplyr::select(
+      dplyr::all_of(time_var),
+      dplyr::any_of(c("ENMO", "GVM", "Direction")),
+      dplyr::matches("CV10s"),
+      dplyr::matches(met_name)
+    ) %>%
     dplyr::rename_with(
       function(x, met_name, tag) {
         gsub(met_name, "", x) %>%
-        paste0("METs_", tag, .)
+        paste0(tag, "_METs_", .)
       },
       dplyr::matches(met_name),
       met_name = met_name,
@@ -43,13 +63,13 @@ wrap_2RM <- function(
     ) %>%
     stats::setNames(., gsub("_+$", "", names(.)))
 
+
   ## Process further if desired
-  if (output_epoch == "default") {
+  if (use_default) {
     results
   } else {
-    collapse_EE(
-      results, time_var, "TwoRegression",
-      unit = output_epoch, verbose = verbose
-    )
+    collapse_EE(results, time_var, output_epoch, verbose)
   }
+
+
 }
