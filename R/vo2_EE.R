@@ -1,6 +1,7 @@
 met_expand <- function(
   d, met_name, tag, met_mlkgmin = 3.5,
-  min_mets = 1, max_mets = 20, RER = 0.85
+  min_mets = 1, max_mets = 20, RER = 0.85,
+  warn_high_low = TRUE
 ) {
 
   d %>%
@@ -24,7 +25,8 @@ met_expand <- function(
       check_values,
       minimum = min_mets, maximum = max_mets,
       label = gsub("[\\._\\-]+", "", toupper(tag)),
-      variable = "MET", units = "MET(s)"
+      variable = "MET", units = "MET(s)",
+      warn_high_low = warn_high_low
     ),
 
     dplyr::across(
@@ -48,12 +50,14 @@ met_expand <- function(
 
 vo2_expand <- function(
   vo2_mlkgmin, d, tag, time_var = "Timestamp",
-  vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70
+  vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
+  warn_high_low = TRUE
 ) {
 
   vo2_mlkgmin %<>% check_values(
     vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
-    gsub("[\\._\\-]+", " ", toupper(tag)), "VO2", "ml/kg/min"
+    gsub("[\\._\\-]+", " ", toupper(tag)),
+    "VO2", "ml/kg/min", warn_high_low
   )
 
   vo2_L_kgmin <- vo2_mlkgmin / 1000

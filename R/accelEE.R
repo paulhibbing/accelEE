@@ -15,8 +15,8 @@
 #'       "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
 #'       "Staudenmayer Linear", "Staudenmayer Random Forest"
 #'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, combine = TRUE,
-#'     ee_vars = c("METs", "VO2", "kcal"), ...
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     combine = TRUE, ee_vars = c("METs", "VO2", "kcal"), ...
 #'   )
 #'
 #'
@@ -29,43 +29,44 @@
 #'     method = c(
 #'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
 #'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, tag = "",
-#'     met_name = "METs", max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     tag = "", met_name = "METs", max_mets = 20, met_mlkgmin = 3.5,
+#'     RER = 0.85, ...
 #'   )
 #'
 #'   hildebrand_linear(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, age = c("youth", "adult"),
-#'     monitor = c("ActiGraph", "GENEActiv"), location = c("hip", "wrist"),
-#'     enmo_name = "ENMO", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
-#'     ...
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
+#'     location = c("hip", "wrist"), enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
+#'     vo2_ceil_mlkgmin = 70, ...
 #'   )
 #'
 #'   hildebrand_nonlinear(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, enmo_name = "ENMO",
-#'     vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     enmo_name = "ENMO", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70, ...
 #'   )
 #'
 #'   montoye(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, side = c("left", "right"),
-#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     side = c("left", "right"), min_mets = 1, max_mets = 20,
+#'     met_mlkgmin = 3.5, RER = 0.85, ...
 #'   )
 #'
 #'   sojourn(
 #'     d, method = c("SIP", "Sojourn 1x", "Sojourn 3x"),
-#'     verbose = FALSE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE,
-#'     tag = "", met_name = "METs", min_mets = 1, max_mets = 20,
-#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     verbose = FALSE, output_epoch = "default", time_var = "Timestamp",
+#'     shrink_output = TRUE, warn_high_low = TRUE, tag = "", met_name = "METs",
+#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
 #'     axis1 = "Axis1", axis2 = "Axis2", axis3 = "Axis3",
 #'     vector.magnitude = "Vector.Magnitude", ...
 #'   )
 #'
 #'   staudenmayer(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE,
+#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
 #'     select = c("METs_lm", "METs_rf"), min_mets = 1, max_mets = 20,
 #'     met_mlkgmin = 3.5, RER = 0.85, ...
 #'   )
@@ -82,9 +83,12 @@
 #'   \code{unit} argument of \code{lubridate::floor_date()}
 #' @param time_var character. Name of the column containing
 #'   POSIX-formatted timestamps
-#' @param shrink_output logical. Reduce the number of columns in output by
-#'   removing calculated feature columns? This does not necessarily have an
-#'   impact for every method
+#' @param shrink_output logical. Reduce the number of columns in output
+#'   by removing calculated feature columns? This does not necessarily
+#'   have an impact for every method, and it is most useful for the
+#'   \code{"Montoye 2017"} method
+#' @param warn_high_low logical. Issue warnings when corrections are applied to
+#'   values that are out of range?
 #' @param combine logical. Combine results from each method into a single
 #'   data frame? If \code{TRUE} (the default), the results will all be collapsed
 #'   to a commonly-compatible epoch length, which may override
@@ -115,8 +119,8 @@
 #' @param RER the respiratory exchange ratio. Used for determining conversion
 #'   factors when calculating caloric expenditure from oxygen consumption
 #' @param side character vector or scalar indicating which side-specific wrist
-#'   model(s) to implement. Can be \code{"left"}, \code{"right"}, or
-#'   \code{c("left", "right")}
+#'   model(s) to implement for \code{"Montoye 2017"}. Can be \code{"left"},
+#'   \code{"right"}, or \code{c("left", "right")}
 #' @param select for internal use in functions related to
 #'   \code{Staudenmayer} methods
 #' @param axis1 for \code{Sojourn 1x} and \code{Sojourn 3x}, the name of the
@@ -202,36 +206,38 @@
 #'   \code{\link[Sojourn]{soj_3x_original}}
 #'
 #' @examples
+#'
 #' ## Raw acceleration examples:
 #'
-#' if (isTRUE(requireNamespace("AGread", quietly = TRUE))) {
+#' if (isTRUE(requireNamespace("read.gt3x", quietly = TRUE))) {
 #'
-#'   f <- system.file("extdata/example.gt3x", package = "AGread")
-#'   d <- AGread::read_gt3x(f, parser = "external")$RAW
-#'
-#'   utils::head(
-#'     accelEE(d, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
-#'   )
-#'
-#'   utils::head(
-#'     accelEE(
-#'       d, "Hildebrand Linear", age = "adult",
-#'       monitor = "ActiGraph", location = "Wrist"
-#'     )
-#'     ##^Not using "Hildebrand Non-Linear" because a warning populates
-#'     ## about low values being rounded up
-#'   )
+#'   f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
+#'   d <- stats::setNames(
+#'     read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE),
+#'     c("Timestamp", "Accelerometer_X", "Accelerometer_Y", "Accelerometer_Z")
+#'   )[1:30000, ]
 #'
 #'   utils::head(
 #'     accelEE(
-#'       d, "Montoye 2017", side = "left"
+#'       d, "Hibbing 2018", algorithm = 1,
+#'       site = c("Left Wrist", "Right Wrist"),
+#'       warn_high_low = FALSE
 #'     )
 #'   )
 #'
 #'   utils::head(
-#'     accelEE(d, "Staudenmayer Random Forest")
-#'     ##^Not using "Staudenmayer Linear" because a warning populates
-#'     ## about low values being rounded up
+#'     accelEE(
+#'       d, c("Hildebrand Linear", "Hildebrand Non-Linear"), age = "adult",
+#'       monitor = "ActiGraph", location = "Wrist", warn_high_low = FALSE,
+#'       ee_vars = c("METs", "kcal"), output_epoch = "60 sec"
+#'     )
+#'   )
+#'
+#'   accelEE(
+#'     d, c(
+#'       "Montoye 2017", "Staudenmayer Linear",
+#'       "Staudenmayer Random Forest"
+#'     ), side = "left", ee_vars = "VO2", combine = FALSE
 #'   )
 #'
 #' }
@@ -262,14 +268,14 @@
 #'   data(SIP_ap, package = "Sojourn")
 #'   d <- Sojourn::enhance_actigraph(SIP_ag, SIP_ap)
 #'
-#'   soj_results <- suppressWarnings(accelEE(d, "SIP", time_var = "Time"))
-#'   #^^Warns about rounding up low MET values
-#'   #  Also note that the SIP method causes a `Timestamp` variable to be
+#'   soj_results <- accelEE(d, "SIP", time_var = "Time", warn_high_low = FALSE)
+#'   #^^Note that the SIP method causes a `Timestamp` variable to be
 #'   #  silently populated, whereas the input data frame must have a column
-#'   #  named `Time` -- The Sojourn methods (especially SIP) are currently
-#'   #  coded in a somewhat finicky way, often requiring specific variable
-#'   #  names for the input. Best practice is to run the package examples
-#'   #  and format your data to match the example data exactly.
+#'   #  named `Time`. In general, the Sojourn methods (especially SIP) are
+#'   #  currently coded somewhat inflexibly, often requiring specific
+#'   #  variable names for the input. Your best bet for getting them to run
+#'   #  is to copy, paste, and execute the package examples, then format your
+#'   #  data to match the example data exactly.
 #'
 #'   soj_results <- accelEE(
 #'     soj_results, "Sojourn 1x", axis1 = "counts", time_var = "Time"
@@ -302,6 +308,7 @@ accelEE <- function(
   output_epoch = "default",
   time_var = "Timestamp",
   shrink_output = TRUE,
+  warn_high_low = TRUE,
   combine = TRUE,
   ee_vars = c("METs", "VO2", "kcal"),
   ...
@@ -326,56 +333,60 @@ accelEE <- function(
       switch,
       "Crouter 2006" = wrap_2RM(
         d, "Crouter 2006", verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "Crouter06", ...
+        output_epoch, time_var, shrink_output,
+        warn_high_low, "Crouter06", ...
 
       ),
       "Crouter 2010" = wrap_2RM(
         d, "Crouter 2010", verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "Crouter10", ...
+        output_epoch, time_var, shrink_output,
+        warn_high_low, "Crouter10", ...
       ),
       "Crouter 2012" = wrap_2RM(
         d, "Crouter 2012", verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "Crouter12", ...
+        output_epoch, time_var, shrink_output,
+        warn_high_low, "Crouter12", ...
       ),
       "Hibbing 2018" = wrap_2RM(
         d, "Hibbing 2018", verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "Hibbing18", ...
+        output_epoch, time_var, shrink_output,
+        warn_high_low, "Hibbing18", ...
       ),
       "Hildebrand Linear" = hildebrand_linear(
-        d, verbose, feature_calc,
-        output_epoch, time_var, shrink_output, ...
+        d, verbose, feature_calc, output_epoch,
+        time_var, shrink_output, warn_high_low, ...
       ),
       "Hildebrand Non-Linear" = hildebrand_nonlinear(
         d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, ...
+        time_var, shrink_output, warn_high_low, ...
       ),
       "Montoye 2017" = montoye(
-        d, verbose, feature_calc,
-        output_epoch, time_var, shrink_output, ...
+        d, verbose, feature_calc, output_epoch,
+        time_var, shrink_output, warn_high_low, ...
       ),
       "SIP" = sojourn(
-        d, "SIP", verbose, output_epoch,
-        time_var, shrink_output, "SIP", ...
+        d, "SIP", verbose, output_epoch, time_var,
+        shrink_output, warn_high_low, "SIP", ...
       ),
       "Sojourn 1x" = sojourn(
-        d, "Sojourn 1x", verbose, output_epoch,
-        time_var, shrink_output, "soj_1x", ...
+        d, "Sojourn 1x", verbose, output_epoch, time_var,
+        shrink_output, warn_high_low, "soj_1x", ...
       ),
       "Sojourn 3x" = sojourn(
-        d, "Sojourn 3x", verbose, output_epoch,
-        time_var, shrink_output, "soj_3x", ...
+        d, "Sojourn 3x", verbose, output_epoch, time_var,
+        shrink_output, warn_high_low, "soj_3x", ...
       ),
       "Staudenmayer Linear" = staudenmayer(
-        d, verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "METs_lm", ...
+        d, verbose, feature_calc, output_epoch,
+        time_var, shrink_output, warn_high_low, "METs_lm", ...
       ),
       "Staudenmayer Random Forest" = staudenmayer(
-        d, verbose, feature_calc,
-        output_epoch, time_var, shrink_output, "METs_rf", ...
+        d, verbose, feature_calc, output_epoch,
+        time_var, shrink_output, warn_high_low, "METs_rf", ...
       ),
       "Staudenmayer Both" = staudenmayer(
-        d, verbose, feature_calc,
-        output_epoch, time_var, shrink_output, c("METs_lm", "METs_rf"), ...
+        d, verbose, feature_calc, output_epoch, time_var,
+        shrink_output, warn_high_low, c("METs_lm", "METs_rf"), ...
       ),
       stop(
         "Invalid value passed for `method` argument:",
@@ -399,7 +410,7 @@ accelEE <- function(
 
     output <- ee_values
 
-    if (length(method) == 1) output %<>% unlist(.)
+    if (length(method) == 1) output %<>% .[[1]]
 
   } else {
 

@@ -7,6 +7,7 @@ hildebrand_linear <- function(
   output_epoch = "default",
   time_var = "Timestamp",
   shrink_output = TRUE,
+  warn_high_low = TRUE,
   age = c("youth", "adult"),
   monitor = c("ActiGraph", "GENEActiv"),
   location = c("hip", "wrist"),
@@ -21,16 +22,13 @@ hildebrand_linear <- function(
     " Hildebrand linear method"
   )
 
-  use_default <- is_default(output_epoch)
-  if (use_default) output_epoch <- "1 sec"
-
   age %<>% hildebrand_input("age", c("youth", "adult"))
   monitor %<>% hildebrand_input("monitor", c("actigraph", "geneactiv"))
   location %<>% hildebrand_input("location", c("hip", "wrist"))
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var)
+    d %<>% generic_features(time_var, ...)
 
   }
 
@@ -48,7 +46,7 @@ hildebrand_linear <- function(
 
       function(
         x, .data, enmo_name, time_var,
-        vo2_floor_mlkgmin, vo2_ceil_mlkgmin
+        vo2_floor_mlkgmin, vo2_ceil_mlkgmin, warn_high_low
       ) {
 
         ## VO2 (ml/kg/min)
@@ -64,14 +62,16 @@ hildebrand_linear <- function(
           paste("hildebrand_linear", x$.age, x$.monitor, x$.location, sep = "_"),
           time_var,
           vo2_floor_mlkgmin,
-          vo2_ceil_mlkgmin
+          vo2_ceil_mlkgmin,
+          warn_high_low
         )
 
       },
 
       .data = d, enmo_name = enmo_name, time_var = time_var,
       vo2_floor_mlkgmin = vo2_floor_mlkgmin,
-      vo2_ceil_mlkgmin = vo2_ceil_mlkgmin
+      vo2_ceil_mlkgmin = vo2_ceil_mlkgmin,
+      warn_high_low = warn_high_low
 
     ) %>%
 
@@ -89,7 +89,7 @@ hildebrand_linear <- function(
 
   }
 
-  if (use_default) return(results)
+  if (is_default(output_epoch)) return(results)
 
   collapse_EE(results, time_var, output_epoch, verbose)
 
@@ -105,6 +105,7 @@ hildebrand_nonlinear <- function(
   output_epoch = "default",
   time_var = "Timestamp",
   shrink_output = TRUE,
+  warn_high_low = TRUE,
   enmo_name = "ENMO",
   vo2_floor_mlkgmin = 3,
   vo2_ceil_mlkgmin = 70,
@@ -116,13 +117,10 @@ hildebrand_nonlinear <- function(
     " Hildebrand non-linear method"
   )
 
-  use_default <- is_default(output_epoch)
-
-  if (use_default) output_epoch <- "1 sec"
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var)
+    d %<>% generic_features(time_var, ...)
 
   }
 
@@ -132,7 +130,8 @@ hildebrand_nonlinear <- function(
     {0.901 * .} %>%
     vo2_expand(
       d, "hildebrand_nonlinear", time_var,
-      vo2_floor_mlkgmin, vo2_ceil_mlkgmin
+      vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
+      warn_high_low
     )
 
   if (!shrink_output) {
@@ -145,7 +144,7 @@ hildebrand_nonlinear <- function(
 
   }
 
-  if (use_default) return(results)
+  if (is_default(output_epoch)) return(results)
 
   collapse_EE(results, time_var, output_epoch, verbose)
 

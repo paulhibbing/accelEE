@@ -7,10 +7,11 @@
 montoye_features(
   d,
   time_var = "Timestamp",
-  side = c("left", "right"),
   x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y",
   z_var = "Accelerometer_Z",
+  side = c("left", "right"),
+  win_width_sec = 30,
   ...
 )
 }
@@ -20,15 +21,17 @@ montoye_features(
 \item{time_var}{character. Name of the variable in \code{d} containing
 POSIX-formatted timestamp information}
 
-\item{side}{character vector or scalar indicating which side-specific wrist
-model(s) to implement. Can be \code{"left"}, \code{"right"}, or
-\code{c("left", "right")}}
-
 \item{x_var}{character. Name of the X-axis variable}
 
 \item{y_var}{character. Name of the Y-axis variable}
 
 \item{z_var}{character. Name of the Z-axis variable}
+
+\item{side}{character vector or scalar indicating which side-specific wrist
+model(s) to implement for \code{"Montoye 2017"}. Can be \code{"left"},
+\code{"right"}, or \code{c("left", "right")}}
+
+\item{win_width_sec}{desired window width for features}
 
 \item{...}{currently unused}
 }
@@ -39,12 +42,12 @@ A dataframe of features for entry into the neural networks
 Calculate features for Montoye's neural networks
 }
 \examples{
-if (isTRUE(requireNamespace("AGread"))) {
+if (isTRUE(requireNamespace("read.gt3x"))) {
 
-  f <- system.file("extdata/example.gt3x", package = "AGread")
-  d <- AGread::read_gt3x(f, parser = "external")$RAW
+  f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
+  d <- read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE)
 
-  head(montoye_features(d))
+  montoye_features(d[1:12000, ], "time", "X", "Y","Z", "right")
 
 }
 }

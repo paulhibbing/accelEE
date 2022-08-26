@@ -6,21 +6,16 @@
 \usage{
 staudenmayer_features(
   d,
-  samp_freq = 80,
-  win_width_sec = 15,
   time_var = "Timestamp",
   x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y",
   z_var = "Accelerometer_Z",
+  win_width_sec = 15,
   ...
 )
 }
 \arguments{
 \item{d}{data frame of ActiGraph data (raw samples)}
-
-\item{samp_freq}{sampling frequency}
-
-\item{win_width_sec}{desired window width for features (default is 15 sec)}
 
 \item{time_var}{character. Name of the variable in \code{d} containing
 POSIX-formatted timestamp information}
@@ -31,6 +26,8 @@ POSIX-formatted timestamp information}
 
 \item{z_var}{character. Name of the Z-axis variable}
 
+\item{win_width_sec}{desired window width for features}
+
 \item{...}{currently unused}
 }
 \value{
@@ -40,12 +37,12 @@ Data frame containing features in the specified format
 Calculate features for Staudanmayer models
 }
 \examples{
-if (isTRUE(requireNamespace("AGread"))) {
+if (isTRUE(requireNamespace("read.gt3x"))) {
 
-  f <- system.file("extdata/example.gt3x", package = "AGread")
-  d <- AGread::read_gt3x(f, parser = "external")$RAW
+  f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
+  d <- read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE)
 
-  head(staudenmayer_features(d, 90))
+  staudenmayer_features(d[1:12000, ], "time", "X", "Y", "Z")
 
 }
 }

@@ -8,6 +8,7 @@ wrap_2RM <- function(
   output_epoch = "default",
   time_var = "Timestamp",
   shrink_output = TRUE,
+  warn_high_low = TRUE,
   tag = "",
   met_name = "METs",
   max_mets = 20,
@@ -30,7 +31,7 @@ wrap_2RM <- function(
 
     if (feature_calc & "Hibbing 2018" %in% method) {
 
-      d %<>% generic_features(time_var)
+      d %<>% generic_features(time_var, ...)
 
     }
 
@@ -48,7 +49,10 @@ wrap_2RM <- function(
         dplyr::matches("CV10s"),
         dplyr::matches(met_name)
       ) %>%
-      met_expand(met_name, tag, met_mlkgmin, -Inf, max_mets, RER)
+      met_expand(
+        met_name, tag, met_mlkgmin,
+        -Inf, max_mets, RER, warn_high_low
+      )
 
 
   ## Process further if desired
@@ -58,11 +62,9 @@ wrap_2RM <- function(
       dplyr::matches(tag)
     )
 
-    if (use_default) {
-      results
-    } else {
-      collapse_EE(results, time_var, output_epoch, verbose)
-    }
+    if (is_default(output_epoch)) return(results)
+
+    collapse_EE(results, time_var, output_epoch, verbose)
 
 
 }

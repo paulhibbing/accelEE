@@ -7,36 +7,43 @@
 generic_features(
   d,
   time_var = "Timestamp",
-  verbose = FALSE,
-  output_window_secs = 1
+  x_var = "Accelerometer_X",
+  y_var = "Accelerometer_Y",
+  z_var = "Accelerometer_Z",
+  win_width_sec = 1,
+  ...
 )
 }
 \arguments{
-\item{d}{data frame of ActiGraph data (other monitors not currently
-supported)}
+\item{d}{data frame of ActiGraph data (raw samples)}
 
-\item{time_var}{character. Name of the column in \code{d} containing
+\item{time_var}{character. Name of the variable in \code{d} containing
 POSIX-formatted timestamp information}
 
-\item{verbose}{logical. Print updates to console?}
+\item{x_var}{character. Name of the X-axis variable}
 
-\item{output_window_secs}{The desired epoch length (in seconds) for output}
+\item{y_var}{character. Name of the Y-axis variable}
+
+\item{z_var}{character. Name of the Z-axis variable}
+
+\item{win_width_sec}{desired window width for features}
+
+\item{...}{currently unused}
 }
 \value{
 A data frame of features in the specified epoch length
 }
 \description{
-This is a loose wrapper around \code{AGread::collapse_gt3x}
-}
-\note{
-Currently, input is only accepted for raw ActiGraph accelerometer data
-  processed using the \code{AGread} package.
+Calculate generic features for model application
 }
 \examples{
-if (isTRUE(requireNamespace("AGread"))) {
+if (isTRUE(requireNamespace("read.gt3x"))) {
 
-  f <- system.file("extdata/example.gt3x", package = "AGread")
-  d <- AGread::read_gt3x(f, parser = "external")$RAW
+  f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
+  d <- stats::setNames(
+    read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE),
+    c("Timestamp", "Accelerometer_X", "Accelerometer_Y", "Accelerometer_Z")
+  )[1:30000, ]
 
   utils::head(generic_features(d))
 

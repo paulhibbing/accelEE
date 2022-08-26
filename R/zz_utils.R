@@ -3,61 +3,52 @@
 
 #' Calculate generic features for model application
 #'
-#' This is a loose wrapper around \code{AGread::collapse_gt3x}
-#'
-#' @param d data frame of ActiGraph data (other monitors not currently
-#'   supported)
-#' @param time_var character. Name of the column in \code{d} containing
+#' @param d data frame of ActiGraph data (raw samples)
+#' @param time_var character. Name of the variable in \code{d} containing
 #'   POSIX-formatted timestamp information
-#' @param verbose logical. Print updates to console?
-#' @param output_window_secs The desired epoch length (in seconds) for output
+#' @param x_var character. Name of the X-axis variable
+#' @param y_var character. Name of the Y-axis variable
+#' @param z_var character. Name of the Z-axis variable
+#' @param win_width_sec desired window width for features
+#' @param ... currently unused
 #'
 #' @return A data frame of features in the specified epoch length
 #' @export
 #'
-#' @note Currently, input is only accepted for raw ActiGraph accelerometer data
-#'   processed using the \code{AGread} package.
-#'
 #' @examples
-#' if (isTRUE(requireNamespace("AGread"))) {
+#' if (isTRUE(requireNamespace("read.gt3x"))) {
 #'
-#'   f <- system.file("extdata/example.gt3x", package = "AGread")
-#'   d <- AGread::read_gt3x(f, parser = "external")$RAW
+#'   f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
+#'   d <- stats::setNames(
+#'     read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE),
+#'     c("Timestamp", "Accelerometer_X", "Accelerometer_Y", "Accelerometer_Z")
+#'   )[1:30000, ]
 #'
 #'   utils::head(generic_features(d))
 #'
 #' }
 generic_features <- function(
-  d, time_var = "Timestamp", verbose = FALSE,
-  output_window_secs = 1
+  d, time_var = "Timestamp", x_var = "Accelerometer_X",
+  y_var = "Accelerometer_Y", z_var = "Accelerometer_Z",
+  win_width_sec = 1, ...
 ) {
 
-  if (!isTRUE(requireNamespace("AGread", quietly = TRUE))) stop(
-    "You must install the AGread package to use automatic",
-    " feature calculation in this case", call. = FALSE
-  )
-
-  if (inherits(d, "RAW", TRUE) != 1) stop(
-    "Cannot auto-calculate generic features unless input is a ",
-    "`RAW` object from the AGread package", call. = FALSE
-  )
-
-  e <- epoch_length(d, time_var)
-
-  if (e > 1/29) stop(
-    "Expecting raw ActiGraph data, but auto-detected epoch",
-    " length is ", e, " sec -- something could be wrong", call. = FALSE
-  )
-
-  suppressMessages(
-    AGread::collapse_gt3x(
-      d, filename = "", verbose = verbose,
-      output_window_secs = output_window_secs
-    )
+  d %T>%
+  {if ("vm" %in% names(.)) warning(
+    "Overwriting/re-calculating `vm`", call. = FALSE
+  )} %T>%
+  {if ("ENMO" %in% names(.)) warning(
+    "Overwriting/re-calculating `ENMO`", call. = FALSE
+  )} %>%
+  dplyr::mutate(
+    vm := sqrt(
+      (!!as.name(x_var))^2 +
+      (!!as.name(y_var))^2 +
+      (!!as.name(z_var))^2
+    ),
+    ENMO = pmax(vm - 1, 0)*1000
   ) %>%
-  dplyr::select(
-    !dplyr::matches(c("file_source", "date_processed"))
-  )
+  collapse_EE(time_var, lubridate::period(win_width_sec))
 
 }
 

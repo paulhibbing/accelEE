@@ -1,6 +1,7 @@
 predict_model <- function(
   d, out_name, model, label,
-  min_mets = 1, max_mets = 20
+  min_mets = 1, max_mets = 20,
+  warn_high_low = TRUE
 ) {
 
   stopifnot(
@@ -11,7 +12,8 @@ predict_model <- function(
   dplyr::mutate(
     !!as.name(out_name) := check_values(
       stats::predict(model, newdata = d),
-      min_mets, max_mets, label, "MET", "MET(s)"
+      min_mets, max_mets, label,
+      "MET", "MET(s)", warn_high_low
     )
   )
 
@@ -21,7 +23,8 @@ predict_model <- function(
 check_values <- function(
   x, minimum, maximum, label,
   variable = c("MET", "VO2"),
-  units = c("MET(s)", "ml/kg/min")
+  units = c("MET(s)", "ml/kg/min"),
+  warn_high_low = TRUE
 ) {
 
 
@@ -42,7 +45,7 @@ check_values <- function(
 
     if (any(check_small)) {
 
-      warning(
+      if (warn_high_low) warning(
         "Rounding up ", paste(sum(check_small), variable), " value(s) below",
         " the minimum of ", paste(minimum, units), " for the ", label,
         " method", call. = FALSE
@@ -59,9 +62,9 @@ check_values <- function(
 
     if (any(check_big)) {
 
-      warning(
-        "Rounding down ", sum(check_big), " MET value(s) above",
-        " the maximum of ", maximum, " METs for the ", label,
+      if (warn_high_low) warning(
+        "Rounding down ", paste(sum(check_big), variable), " value(s) above",
+        " the maximum of ", paste(maximum, units), " for the ", label,
         " method", call. = FALSE
       )
 
