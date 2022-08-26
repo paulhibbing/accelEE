@@ -20,7 +20,7 @@ wrap_2RM <- function(
   ## Setup
 
     method <- match.arg(method)
-    if (verbose) cat("\n...Getting predictions for", method, "method")
+    if (verbose) cat("\n...Getting predictions for the", method, "method")
     use_default <- is_default(output_epoch)
     if (use_default) output_epoch <- "1 sec"
 
@@ -30,7 +30,7 @@ wrap_2RM <- function(
 
     if (feature_calc & "Hibbing 2018" %in% method) {
 
-      d %<>% generic_features(time_var, verbose)
+      d %<>% generic_features(time_var)
 
     }
 

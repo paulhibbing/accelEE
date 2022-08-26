@@ -30,7 +30,7 @@ hildebrand_linear <- function(
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var, verbose)
+    d %<>% generic_features(time_var)
 
   }
 
@@ -122,7 +122,7 @@ hildebrand_nonlinear <- function(
 
   if (feature_calc) {
 
-    d %<>% generic_features(time_var, verbose)
+    d %<>% generic_features(time_var)
 
   }
 

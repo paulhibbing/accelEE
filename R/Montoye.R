@@ -117,7 +117,7 @@ montoye <- function(
     stopifnot(all(side %in% c("left", "right")))
 
     if (verbose) cat(
-      "\n...Getting predictions for the Montoye ",
+      "\n...Getting predictions for the Montoye",
       paste(side, collapse = " and "),
       dplyr::recode(
         length(side), "method", "methods",
