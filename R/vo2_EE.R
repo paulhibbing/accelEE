@@ -23,7 +23,7 @@ met_expand <- function(
       dplyr::contains("METs"),
       check_values,
       minimum = min_mets, maximum = max_mets,
-      label = gsub("[\\._\\-]+", "", tag),
+      label = gsub("[\\._\\-]+", "", toupper(tag)),
       variable = "MET", units = "MET(s)"
     ),
 
@@ -53,7 +53,7 @@ vo2_expand <- function(
 
   vo2_mlkgmin %<>% check_values(
     vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
-    gsub("[_-.]+", "", tag), "VO2", "ml/kg/min"
+    gsub("[\\._\\-]+", " ", toupper(tag)), "VO2", "ml/kg/min"
   )
 
   vo2_L_kgmin <- vo2_mlkgmin / 1000

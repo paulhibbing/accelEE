@@ -14,7 +14,7 @@
 #'       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
 #'       "Staudenmayer Linear", "Staudenmayer Random Forest"
 #'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", combine = TRUE, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, combine = TRUE, ...
 #'   )
 #'
 #'
@@ -27,13 +27,13 @@
 #'     method = c(
 #'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
 #'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", tag = "", met_name = "METs", max_mets = 20,
-#'     met_mlkgmin = 3.5, RER = 0.85, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, tag = "",
+#'     met_name = "METs", max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
 #'   )
 #'
 #'   hildebrand_linear(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", age = c("youth", "adult"),
+#'     time_var = "Timestamp", shrink_output = TRUE, age = c("youth", "adult"),
 #'     monitor = c("ActiGraph", "GENEActiv"), location = c("hip", "wrist"),
 #'     enmo_name = "ENMO", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
 #'     ...
@@ -41,21 +41,21 @@
 #'
 #'   hildebrand_nonlinear(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
-#'     vo2_ceil_mlkgmin = 70, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, enmo_name = "ENMO",
+#'     vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70, ...
 #'   )
 #'
 #'   montoye(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", side = c("left", "right"),
-#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
-#'     shrink_output = TRUE, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, side = c("left", "right"),
+#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
 #'   )
 #'
 #'   staudenmayer(
 #'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", select = c("METs_lm", "METs_rf"),
-#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
+#'     time_var = "Timestamp", shrink_output = TRUE,
+#'     select = c("METs_lm", "METs_rf"), min_mets = 1, max_mets = 20,
+#'     met_mlkgmin = 3.5, RER = 0.85, ...
 #'   )
 #'
 #'
@@ -70,6 +70,8 @@
 #'   \code{unit} argument of \code{lubridate::floor_date()}
 #' @param time_var character. Name of the column containing
 #'   POSIX-formatted timestamps
+#' @param shrink_output logical. Reduce the number of columns in output by
+#'   removing calculated feature columns?
 #' @param combine logical. Combine results from each method into a single
 #'   data frame? If \code{TRUE} (the default), the results will all be collapsed
 #'   to a commonly-compatible epoch length, which may override
@@ -99,9 +101,6 @@
 #' @param side character vector or scalar indicating which side-specific wrist
 #'   model(s) to implement. Can be \code{"left"}, \code{"right"}, or
 #'   \code{c("left", "right")}
-#' @param shrink_output logical. Reduce the number of columns in output by
-#'   removing calculated feature columns? Currently applies to \code{Montoye}
-#'   methods only
 #' @param select for internal use in functions related to
 #'   \code{Staudenmayer} methods
 #'
@@ -147,27 +146,29 @@
 #' if (isTRUE(requireNamespace("AGread"))) {
 #'
 #'   f <- system.file("extdata/example.gt3x", package = "AGread")
-#'   AG <- AGread::read_gt3x(f, parser = "external")$RAW
+#'   d <- AGread::read_gt3x(f, parser = "external")$RAW
 #'
 #'   utils::head(
-#'     accelEE(AG, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
+#'     accelEE(d, "Hibbing 2018", algorithm = 1, site = "Right Wrist")
 #'   )
 #'
 #'   utils::head(
 #'     accelEE(
-#'       AG, c("Hildebrand Linear", "Hildebrand Non-Linear"), age = "adult",
+#'       d, "Hildebrand Linear", age = "adult",
 #'       monitor = "ActiGraph", location = "Wrist"
 #'     )
+#'     ##^Not using "Hildebrand Non-Linear" because a warning populates
+#'     ## about low values being rounded up
 #'   )
 #'
 #'   utils::head(
 #'     accelEE(
-#'       AG, "Montoye 2017", side = "left"
+#'       d, "Montoye 2017", side = "left"
 #'     )
 #'   )
 #'
 #'   utils::head(
-#'     accelEE(AG, "Staudenmayer Random Forest")
+#'     accelEE(d, "Staudenmayer Random Forest")
 #'     ##^Not using "Staudenmayer Linear" because a warning populates
 #'     ## about low values being rounded up
 #'   )
@@ -188,6 +189,7 @@ accelEE <- function(
   feature_calc = TRUE,
   output_epoch = "default",
   time_var = "Timestamp",
+  shrink_output = TRUE,
   combine = TRUE,
   ...
 ) {
@@ -210,44 +212,44 @@ accelEE <- function(
       switch,
       "Crouter 2006" = wrap_2RM(
         d, "Crouter 2006", verbose, feature_calc,
-        output_epoch, time_var, "Crouter06", ...
+        output_epoch, time_var, shrink_output, "Crouter06", ...
 
       ),
       "Crouter 2010" = wrap_2RM(
         d, "Crouter 2010", verbose, feature_calc,
-        output_epoch, time_var, "Crouter10", ...
+        output_epoch, time_var, shrink_output, "Crouter10", ...
       ),
       "Crouter 2012" = wrap_2RM(
         d, "Crouter 2012", verbose, feature_calc,
-        output_epoch, time_var, "Crouter12", ...
+        output_epoch, time_var, shrink_output, "Crouter12", ...
       ),
       "Hibbing 2018" = wrap_2RM(
         d, "Hibbing 2018", verbose, feature_calc,
-        output_epoch, time_var, "Hibbing18", ...
+        output_epoch, time_var, shrink_output, "Hibbing18", ...
       ),
       "Hildebrand Linear" = hildebrand_linear(
         d, verbose, feature_calc,
-        output_epoch, time_var, ...
+        output_epoch, time_var, shrink_output, ...
       ),
       "Hildebrand Non-Linear" = hildebrand_nonlinear(
-        d, verbose, feature_calc,
-        output_epoch, time_var, ...
+        d, verbose, feature_calc, output_epoch,
+        time_var, shrink_output, ...
       ),
       "Montoye 2017" = montoye(
         d, verbose, feature_calc,
-        output_epoch, time_var,  ...
+        output_epoch, time_var, shrink_output, ...
       ),
       "Staudenmayer Linear" = staudenmayer(
         d, verbose, feature_calc,
-        output_epoch, time_var, "METs_lm", ...
+        output_epoch, time_var, shrink_output, "METs_lm", ...
       ),
       "Staudenmayer Random Forest" = staudenmayer(
         d, verbose, feature_calc,
-        output_epoch, time_var, "METs_rf", ...
+        output_epoch, time_var, shrink_output, "METs_rf", ...
       ),
       "Staudenmayer Both" = staudenmayer(
         d, verbose, feature_calc,
-        output_epoch, time_var, c("METs_lm", "METs_rf"), ...
+        output_epoch, time_var, shrink_output, c("METs_lm", "METs_rf"), ...
       ),
       stop(
         "Invalid value passed for `method` argument:",

@@ -25,6 +25,8 @@ montoye_features <- function(
   z_var = "Accelerometer_Z", ...
 ) {
 
+  stopifnot(all(side %in% c("left", "right")))
+
   expected <- get_samp_freq(d, time_var) * 30
 
   d %<>%
@@ -82,10 +84,16 @@ montoye_features <- function(
     dplyr::filter(n == expected) %>%
     dplyr::select(-n)
 
-  d %>%
-  stats::setNames(., gsub("^AL_LW_", "AL_RW_", names(.))) %>%
-  dplyr::select(!dplyr::all_of(time_var)) %>%
-  dplyr::bind_cols(d, .)
+  if ("right" %in% side) d %<>%
+    stats::setNames(., gsub("^AL_LW_", "AL_RW_", names(.))) %>%
+    dplyr::select(!dplyr::all_of(time_var)) %>%
+    dplyr::bind_cols(d, .)
+
+  if (!"left" %in% side) d %<>% dplyr::select(
+    !dplyr::matches("^AL_LW_")
+  )
+
+  d
 
 }
 
@@ -94,9 +102,8 @@ montoye_features <- function(
 
 montoye <- function(
   d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-  time_var = "Timestamp", side = c("left", "right"),
-  min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
-  shrink_output = TRUE, ...
+  time_var = "Timestamp", shrink_output = TRUE, side = c("left", "right"),
+  min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
 ) {
 
 
@@ -126,7 +133,7 @@ montoye <- function(
 
     if (feature_calc) {
 
-      d %<>% montoye_features(time_var, ...)
+      d %<>% montoye_features(time_var, side, ...)
 
     }
 

@@ -83,8 +83,9 @@
 
   staudenmayer <- function(
     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-    time_var = "Timestamp", select = c("METs_lm", "METs_rf"),
-    min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85, ...
+    time_var = "Timestamp", shrink_output = TRUE,
+    select = c("METs_lm", "METs_rf"), min_mets = 1, max_mets = 20,
+    met_mlkgmin = 3.5, RER = 0.85, ...
   ) {
 
 
@@ -146,6 +147,11 @@
 
 
     ## Last steps
+
+      if (shrink_output) results %<>% dplyr::select(
+        dplyr::all_of(time_var),
+        dplyr::matches("staudenmayer")
+      )
 
       if (use_default) return(results)
 

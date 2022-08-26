@@ -6,6 +6,7 @@ hildebrand_linear <- function(
   feature_calc = TRUE,
   output_epoch = "default",
   time_var = "Timestamp",
+  shrink_output = TRUE,
   age = c("youth", "adult"),
   monitor = c("ActiGraph", "GENEActiv"),
   location = c("hip", "wrist"),
@@ -78,6 +79,16 @@ hildebrand_linear <- function(
     do.call(dplyr::bind_cols, .) %>%
     df_unique(.)
 
+  if (!shrink_output) {
+
+    stopifnot(abs(nrow(d) - nrow(results)) <= 1)
+
+    results %<>%
+      dplyr::bind_cols(d, ., .name_repair = "minimal") %>%
+      df_unique(.)
+
+  }
+
   if (use_default) return(results)
 
   collapse_EE(results, time_var, output_epoch, verbose)
@@ -93,6 +104,7 @@ hildebrand_nonlinear <- function(
   feature_calc = TRUE,
   output_epoch = "default",
   time_var = "Timestamp",
+  shrink_output = TRUE,
   enmo_name = "ENMO",
   vo2_floor_mlkgmin = 3,
   vo2_ceil_mlkgmin = 70,
@@ -118,9 +130,20 @@ hildebrand_nonlinear <- function(
     d[[enmo_name]] %>%
     {. ^ .534} %>%
     {0.901 * .} %>%
-    pmax(vo2_floor_mlkgmin) %>%
-    pmin(vo2_ceil_mlkgmin) %>%
-    vo2_expand(d, "hildebrand_nonlinear")
+    vo2_expand(
+      d, "hildebrand_nonlinear", time_var,
+      vo2_floor_mlkgmin, vo2_ceil_mlkgmin
+    )
+
+  if (!shrink_output) {
+
+    stopifnot(abs(nrow(d) - nrow(results)) <= 1)
+
+    results %<>%
+      dplyr::bind_cols(d, ., .name_repair = "minimal") %>%
+      df_unique(.)
+
+  }
 
   if (use_default) return(results)
 
