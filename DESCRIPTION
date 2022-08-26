@@ -9,6 +9,8 @@ Description: Simplifies the application of various energy expenditure models.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/paulhibbing/accelEE
+BugReports: https://github.com/paulhibbing/accelEE/issues
 Imports: 
     digest,
     dplyr,
@@ -19,6 +21,7 @@ Imports:
     purrr,
     randomForest,
     rlang,
+    Sojourn (>= 1.1.0),
     stats,
     tidyr,
     tree,
