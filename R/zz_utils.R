@@ -65,11 +65,6 @@ generic_features <- function(
 # Internal ----------------------------------------------------------------
 
 
-auto_cov <- function(x) stats::cov(
-  utils::head(x, -1), utils::tail(x, -1)
-)
-
-
 check_data_format <- function(d) {
 
   if (is.list(d) & exists("RAW", d)) {
@@ -252,6 +247,45 @@ get_compatible_epoch <- function(
 }
 
 
+get_ee_vars <- function(ee_vars) {
+
+  ee_options <- c("mets", "vo2", "kcal")
+  ee_vars %<>% tolower(.)
+
+  if (any(!ee_vars %in% ee_options)) {
+
+    removals <- setdiff(ee_vars, ee_options)
+
+    warning(
+      "Illegal value(s) passed for `ee_vars` argument.",
+      " Shown below in lowercase\n--->",
+      " c(", paste(dQuote(removals), collapse = ", "), ")",
+      call. = FALSE
+    )
+
+    ee_vars %<>% setdiff(removals)
+
+  }
+
+
+  if (length(ee_vars) == 0) stop(
+    "Selection for `ee_vars` must be one or more of ",
+    "c(\"METs\", \"VO2\", \"kcal\")", call. = FALSE
+  )
+
+
+  stopifnot(all(ee_vars %in% ee_options))
+
+  dplyr::recode(
+    ee_vars,
+    "mets" = "METs",
+    "vo2" = "vo2",
+    "kcal" = "kcal"
+  )
+
+}
+
+
 unit_to_sec <- function(unit) {
 
   if (isTRUE(unit == "default")) stop(
@@ -346,3 +380,8 @@ df_unique <- function(df) {
 
 
 }
+
+
+auto_cov <- function(x) stats::cov(
+  utils::head(x, -1), utils::tail(x, -1)
+)

@@ -19,7 +19,8 @@
       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
       "Staudenmayer Linear", "Staudenmayer Random Forest"
     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-    time_var = "Timestamp", shrink_output = TRUE, combine = TRUE, ...
+    time_var = "Timestamp", shrink_output = TRUE, combine = TRUE,
+    ee_vars = c("METs", "VO2", "kcal"), ...
   )
 
 
@@ -88,6 +89,10 @@ removing calculated feature columns?}
 data frame? If \code{TRUE} (the default), the results will all be collapsed
 to a commonly-compatible epoch length, which may override
 \code{output_epoch} if a suitable selection is not given}
+
+\item{ee_vars}{character vector indicating which energy expenditure variables
+to return. Choose one or more of \code{"METs"}, \code{"VO2"}, and
+\code{"kcal"} (case insensitive)}
 
 \item{...}{arguments passed to specific applicators and beyond. See details}
 

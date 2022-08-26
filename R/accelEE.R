@@ -14,7 +14,8 @@
 #'       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
 #'       "Staudenmayer Linear", "Staudenmayer Random Forest"
 #'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, combine = TRUE, ...
+#'     time_var = "Timestamp", shrink_output = TRUE, combine = TRUE,
+#'     ee_vars = c("METs", "VO2", "kcal"), ...
 #'   )
 #'
 #'
@@ -76,6 +77,9 @@
 #'   data frame? If \code{TRUE} (the default), the results will all be collapsed
 #'   to a commonly-compatible epoch length, which may override
 #'   \code{output_epoch} if a suitable selection is not given
+#' @param ee_vars character vector indicating which energy expenditure variables
+#'   to return. Choose one or more of \code{"METs"}, \code{"VO2"}, and
+#'   \code{"kcal"} (case insensitive)
 #' @param ... arguments passed to specific applicators and beyond. See details
 #' @param tag A character scalar giving an informative tag to add when naming
 #'   variables, to ensure disambiguation (primarily for internal use)
@@ -191,6 +195,7 @@ accelEE <- function(
   time_var = "Timestamp",
   shrink_output = TRUE,
   combine = TRUE,
+  ee_vars = c("METs", "VO2", "kcal"),
   ...
 ) {
 
@@ -203,6 +208,7 @@ accelEE <- function(
   d %<>% check_data_format(.)
   method %<>% check_method_format(.)
   output_epoch %<>% get_compatible_epoch(d, method, time_var, combine)
+  ee_vars %<>% get_ee_vars(.)
 
 
   ## Apply the methods
@@ -260,6 +266,13 @@ accelEE <- function(
     ) %>%
     stats::setNames(., gsub("^Staudenmayer Both$", "Staudenmayer", names(.)))
 
+
+  ## Keep desired variables
+  removals <- setdiff(c("METs", "vo2", "kcal"), ee_vars)
+  if (length(removals) > 0) ee_values %<>% lapply(
+    dplyr::select,
+    !dplyr::matches(removals)
+  )
 
   ## Navigate return formatting
   if (!combine) {
