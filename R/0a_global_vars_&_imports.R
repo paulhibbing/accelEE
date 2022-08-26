@@ -35,7 +35,7 @@
 
 # Imports -----------------------------------------------------------------
 
-#' @import magrittr TwoRegression nnet randomForest
+#' @import magrittr nnet randomForest Sojourn TwoRegression
 NULL
 
 #' @importFrom rlang :=

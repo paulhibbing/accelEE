@@ -112,11 +112,13 @@ check_method_format <- function(method) {
     if (!all(. %in% c(
       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
+      "SIP", "Sojourn 1x", "Sojourn 3x",
       "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
     ))) stop(
       "method must be one of:\n  ", paste(dQuote(c(
         "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
         "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
+        "SIP", "Sojourn 1x", "Sojourn 3x",
         "Staudenmayer Linear", "Staudenmayer Random Forest"
       )), collapse = "\n  "),
       call. = FALSE
@@ -176,11 +178,12 @@ get_compatible_epoch <- function(
         method = c(
           "Crouter 2006", "Crouter 2010", "Crouter 2012",
           "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
-          "Montoye 2017", "Staudenmayer Linear", "Staudenmayer Random Forest",
-          "Staudenmayer Both"
+          "Montoye 2017",
+          "SIP", "Sojourn 1x", "Sojourn 3x",
+          "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
         ),
         epoch = c(
-          rep(60, 3), rep(1, 3), 30, rep(15, 3)
+          rep(60, 3), rep(1, 3), 30, rep(1, 3), rep(15, 3)
         )
       ) %>%
       dplyr::filter(method %in% selection)
@@ -205,7 +208,9 @@ get_compatible_epoch <- function(
           " try a different setting.",
           "\n-->Otherwise, you need to either provide a higher setting or make",
           " separate calls to `accelEE`\n   so you can achieve the desired",
-          " epoch length for each method", call. = FALSE
+          " epoch length for each method. (It still may not be possible",
+          "\n   in some cases, such as for Crouter two-regression models).",
+          call. = FALSE
         )
 
         use_max <- TRUE
@@ -250,7 +255,9 @@ get_compatible_epoch <- function(
 get_ee_vars <- function(ee_vars) {
 
   ee_options <- c("mets", "vo2", "kcal")
+
   ee_vars %<>% tolower(.)
+
 
   if (any(!ee_vars %in% ee_options)) {
 
