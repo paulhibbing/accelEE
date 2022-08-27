@@ -28,10 +28,7 @@ generic_features <- function(
   win_width_sec = 1, verbose = FALSE, ...
 ) {
 
-  if (verbose) cat(
-    "\n...Calculating generic features in ",
-    win_width_sec, "-second windows", sep = ""
-  )
+  if (verbose) cat("\n...Calculating generic features")
 
   d %T>%
   {if ("vm" %in% names(.)) warning(
