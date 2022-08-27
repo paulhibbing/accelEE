@@ -101,10 +101,12 @@ montoye_features <- function(
 # Get predictions ---------------------------------------------------------
 
 montoye <- function(
-  d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-  time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-  side = c("left", "right"), min_mets = 1, max_mets = 20,
-  met_mlkgmin = 3.5, RER = 0.85, ...
+  d, time_var = "Timestamp", output_epoch = "default",
+  min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+  met_mlkgmin = 3.5, RER = 0.85,
+  feature_calc = TRUE, shrink_output = TRUE,
+  verbose = FALSE, side = c("left", "right"),
+  ...
 ) {
 
 

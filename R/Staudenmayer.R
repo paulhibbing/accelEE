@@ -74,10 +74,11 @@
 
 
   staudenmayer <- function(
-    d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-    time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-    select = c("METs_lm", "METs_rf"), min_mets = 1, max_mets = 20,
-    met_mlkgmin = 3.5, RER = 0.85, ...
+    d, time_var = "Timestamp", output_epoch = "default",
+    min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+    met_mlkgmin = 3.5, RER = 0.85,
+    feature_calc = TRUE, shrink_output = TRUE,
+    verbose = FALSE, ..., select = c("METs_lm", "METs_rf")
   ) {
 
 
@@ -174,22 +175,6 @@
       )
     )
 
-  }
-
-
-  get_samp_freq <- function(d, time_var) {
-    epoch_length(d, time_var) %T>%
-    {if (. >= 1) stop(
-      "Expecting raw data, but sampling frequency is >= 1 sec",
-      call. = FALSE
-    )} %>%
-    {round(1 / .)} %T>%
-    {if (. %% 10 != 0) stop(
-      "Expecting sampling frequency to be a multiple of 10 (detected: ",
-      ., ").\n  This may be a calculation bug that needs fixing",
-      " (or updating to\n  accommodate newer monitors with",
-      " different options).", call. = FALSE
-    )}
   }
 
 

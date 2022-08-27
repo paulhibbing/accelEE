@@ -1,20 +1,12 @@
 # Linear ------------------------------------------------------------------
 
 hildebrand_linear <- function(
-  d,
-  verbose = FALSE,
-  feature_calc = TRUE,
-  output_epoch = "default",
-  time_var = "Timestamp",
-  shrink_output = TRUE,
-  warn_high_low = TRUE,
-  age = c("youth", "adult"),
-  monitor = c("ActiGraph", "GENEActiv"),
-  location = c("hip", "wrist"),
-  enmo_name = "ENMO",
-  vo2_floor_mlkgmin = 3,
-  vo2_ceil_mlkgmin = 70,
-  ...
+  d, time_var = "Timestamp", output_epoch = "default",
+  min_vo2_mlkgmin = 3, max_vo2_mlkgmin = 70, warn_high_low = TRUE,
+  met_mlkgmin = 3.5, RER = 0.85,
+  feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
+  age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
+  location = c("hip", "wrist"), enmo_name = "ENMO", ...
 ) {
 
   if (verbose) cat(
@@ -27,6 +19,10 @@ hildebrand_linear <- function(
   location %<>% hildebrand_input("location", c("hip", "wrist"))
 
   if (feature_calc) {
+
+    if (verbose) cat(
+      "\n...Calculating 1-s features for the HILDEBRAND LINEAR method"
+    )
 
     d %<>% generic_features(time_var, ...)
 
@@ -46,13 +42,14 @@ hildebrand_linear <- function(
 
       function(
         x, .data, enmo_name, time_var,
-        vo2_floor_mlkgmin, vo2_ceil_mlkgmin, warn_high_low
+        min_vo2_mlkgmin, max_vo2_mlkgmin, warn_high_low,
+        met_mlkgmin, RER
       ) {
 
         ## VO2 (ml/kg/min)
         ifelse(
           .data[[enmo_name]] <= x$cp,
-          vo2_floor_mlkgmin,
+          min_vo2_mlkgmin,
           .data[[enmo_name]] * x$slope + x$intercept
         ) %>%
 
@@ -61,17 +58,21 @@ hildebrand_linear <- function(
           .data,
           paste("hildebrand_linear", x$.age, x$.monitor, x$.location, sep = "_"),
           time_var,
-          vo2_floor_mlkgmin,
-          vo2_ceil_mlkgmin,
-          warn_high_low
+          min_vo2_mlkgmin,
+          max_vo2_mlkgmin,
+          warn_high_low,
+          met_mlkgmin,
+          RER
         )
 
       },
 
       .data = d, enmo_name = enmo_name, time_var = time_var,
-      vo2_floor_mlkgmin = vo2_floor_mlkgmin,
-      vo2_ceil_mlkgmin = vo2_ceil_mlkgmin,
-      warn_high_low = warn_high_low
+      min_vo2_mlkgmin = min_vo2_mlkgmin,
+      max_vo2_mlkgmin = max_vo2_mlkgmin,
+      warn_high_low = warn_high_low,
+      met_mlkgmin = met_mlkgmin,
+      RER = RER
 
     ) %>%
 
@@ -99,17 +100,11 @@ hildebrand_linear <- function(
 # Non-Linear --------------------------------------------------------------
 
 hildebrand_nonlinear <- function(
-  d,
-  verbose = FALSE,
-  feature_calc = TRUE,
-  output_epoch = "default",
-  time_var = "Timestamp",
-  shrink_output = TRUE,
-  warn_high_low = TRUE,
-  enmo_name = "ENMO",
-  vo2_floor_mlkgmin = 3,
-  vo2_ceil_mlkgmin = 70,
-  ...
+  d, time_var = "Timestamp", output_epoch = "default",
+  min_vo2_mlkgmin = 3, max_vo2_mlkgmin = 70, warn_high_low = TRUE,
+  met_mlkgmin = 3.5, RER = 0.85,
+  feature_calc = TRUE, shrink_output = TRUE,
+  verbose = FALSE, enmo_name = "ENMO", ...
 ) {
 
   if (verbose) cat(
@@ -119,6 +114,10 @@ hildebrand_nonlinear <- function(
 
 
   if (feature_calc) {
+
+    if (verbose) cat(
+      "\n...Calculating 1-s features for the HILDEBRAND NON-LINEAR method"
+    )
 
     d %<>% generic_features(time_var, ...)
 
@@ -130,8 +129,8 @@ hildebrand_nonlinear <- function(
     {0.901 * .} %>%
     vo2_expand(
       d, "hildebrand_nonlinear", time_var,
-      vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
-      warn_high_low
+      min_vo2_mlkgmin, max_vo2_mlkgmin,
+      warn_high_low, met_mlkgmin, RER
     )
 
   if (!shrink_output) {

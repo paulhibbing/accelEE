@@ -1,6 +1,6 @@
 #' Predict energy expenditure for accelerometry data
-#' @aliases hildebrand_linear hildebrand_nonlinear staudenmayer
-#'   wrap_2RM montoye sojourn
+#' @aliases wrap_2RM hildebrand_linear hildebrand_nonlinear
+#'   montoye sojourn staudenmayer
 #'
 #'
 #' @usage
@@ -10,13 +10,14 @@
 #'
 #'   accelEE(
 #'     d, method = c(
-#'       "Crouter 2006", "Crouter 2010", "Crouter 2012",
-#'       "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
-#'       "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
-#'       "Staudenmayer Linear", "Staudenmayer Random Forest"
-#'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-#'     combine = TRUE, ee_vars = c("METs", "VO2", "kcal"), ...
+#'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
+#'       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
+#'       "SIP", "Sojourn 1x", "Sojourn 3x", "Staudenmayer Linear",
+#'       "Staudenmayer Random Forest"
+#'     ), time_var = "Timestamp", output_epoch = "default",
+#'     warn_high_low = TRUE, met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE, combine = TRUE,
+#'     ee_vars = c("METs", "VO2", "kcal"), verbose = FALSE, ...
 #'   )
 #'
 #'
@@ -25,70 +26,82 @@
 #' ## under 'See Also'):
 #'
 #'   wrap_2RM(
-#'     d,
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     max_mets = 20, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
 #'     method = c(
-#'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
-#'     ), verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-#'     tag = "", met_name = "METs", max_mets = 20, met_mlkgmin = 3.5,
-#'     RER = 0.85, ...
+#'       "Crouter 2006", "Crouter 2010",
+#'       "Crouter 2012", "Hibbing 2018"
+#'     ), ..., met_name = "METs", tag = ""
 #'   )
 #'
 #'   hildebrand_linear(
-#'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     min_vo2_mlkgmin = 3, max_vo2_mlkgmin = 70, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
 #'     age = c("youth", "adult"), monitor = c("ActiGraph", "GENEActiv"),
-#'     location = c("hip", "wrist"), enmo_name = "ENMO", vo2_floor_mlkgmin = 3,
-#'     vo2_ceil_mlkgmin = 70, ...
+#'     location = c("hip", "wrist"), enmo_name = "ENMO", ...
 #'   )
 #'
 #'   hildebrand_nonlinear(
-#'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-#'     enmo_name = "ENMO", vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70, ...
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     min_vo2_mlkgmin = 3, max_vo2_mlkgmin = 70, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE,
+#'     verbose = FALSE, enmo_name = "ENMO", ...
 #'   )
 #'
 #'   montoye(
-#'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-#'     side = c("left", "right"), min_mets = 1, max_mets = 20,
-#'     met_mlkgmin = 3.5, RER = 0.85, ...
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE,
+#'     verbose = FALSE, side = c("left", "right"),
+#'     ...
 #'   )
 #'
 #'   sojourn(
-#'     d, method = c("SIP", "Sojourn 1x", "Sojourn 3x"),
-#'     verbose = FALSE, output_epoch = "default", time_var = "Timestamp",
-#'     shrink_output = TRUE, warn_high_low = TRUE, tag = "", met_name = "METs",
-#'     min_mets = 1, max_mets = 20, met_mlkgmin = 3.5, RER = 0.85,
+#'     d,  time_var = "Timestamp", output_epoch = "default",
+#'     min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     shrink_output = TRUE, verbose = FALSE,
 #'     axis1 = "Axis1", axis2 = "Axis2", axis3 = "Axis3",
-#'     vector.magnitude = "Vector.Magnitude", ...
+#'     vector.magnitude = "Vector.Magnitude",
+#'     method = c("SIP", "Sojourn 1x", "Sojourn 3x"),
+#'     ..., met_name = "METs", tag = ""
 #'   )
 #'
 #'   staudenmayer(
-#'     d, verbose = FALSE, feature_calc = TRUE, output_epoch = "default",
-#'     time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-#'     select = c("METs_lm", "METs_rf"), min_mets = 1, max_mets = 20,
-#'     met_mlkgmin = 3.5, RER = 0.85, ...
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     feature_calc = TRUE, shrink_output = TRUE,
+#'     verbose = FALSE, ..., select = c("METs_lm", "METs_rf")
 #'   )
 #'
 #'
 #' @param d data frame of data to use for generating predictions
 #' @param method the method(s) to use
-#' @param verbose logical. Print updates to console?
-#' @param feature_calc logical. Calculate features for the selected method(s)?
-#'   If \code{FALSE}, the assumption is that features have already been
-#'   calculated
+#' @param time_var character. Name of the column containing
+#'   POSIX-formatted timestamps
 #' @param output_epoch character. The desired epoch length of output. Acceptable
 #'   options are \code{"default"} or else a setting appropriate for the
 #'   \code{unit} argument of \code{lubridate::floor_date()}
-#' @param time_var character. Name of the column containing
-#'   POSIX-formatted timestamps
-#' @param shrink_output logical. Reduce the number of columns in output
-#'   by removing calculated feature columns? This does not necessarily
-#'   have an impact for every method, and it is most useful for the
-#'   \code{"Montoye 2017"} method
 #' @param warn_high_low logical. Issue warnings when corrections are applied to
 #'   values that are out of range?
+#' @param met_mlkgmin conversion factor for transforming oxygen consumption (in
+#'   ml/kg/min) into metabolic equivalents (METs)
+#' @param RER the respiratory exchange ratio. Used for determining conversion
+#'   factors when calculating caloric expenditure from oxygen consumption
+#' @param feature_calc logical. Calculate features for the selected method(s)?
+#'   If \code{FALSE}, the assumption is that features have already been
+#'   calculated
+#' @param shrink_output logical. Reduce the number of columns in output
+#'   by removing calculated feature columns? This does not necessarily
+#'   have an impact for every method, and is currently most useful for the
+#'   \code{"Montoye 2017"} method
 #' @param combine logical. Combine results from each method into a single
 #'   data frame? If \code{TRUE} (the default), the results will all be collapsed
 #'   to a commonly-compatible epoch length, which may override
@@ -96,33 +109,24 @@
 #' @param ee_vars character vector indicating which energy expenditure variables
 #'   to return. Choose one or more of \code{"METs"}, \code{"VO2"}, and
 #'   \code{"kcal"} (case insensitive)
+#' @param verbose logical. Print updates to console?
 #' @param ... arguments passed to specific applicators and beyond. See details
-#' @param tag [for internal use] A character scalar giving an informative tag to
-#'   add when naming variables
-#' @param met_name character. The name of the column containing metabolic
-#'   equivalent values (METs)
+#' @param min_mets minimum allowable metabolic equivalent (MET) value. Values
+#'   lower than this (if any) will be rounded up to it
+#' @param max_mets maximum allowable metabolic equivalent (MET) value. Values
+#'   higher than this (if any) will be rounded down to it
+#' @param min_vo2_mlkgmin minimum allowable oxygen consumption value (in
+#'   ml/kg/min). Values lower than this (if any) will be rounded up to it
+#' @param max_vo2_mlkgmin maximum allowable oxygen consumption value (in
+#'   ml/kg/min). Values higher than this (if any) will be rounded down to it
 #' @param age the age group(s) of desired Hildebrand equation(s) to apply
 #' @param monitor the monitor being worn by the participant
 #' @param location the placement of the monitor on the body
 #' @param enmo_name name of the variable containing Euclidian Norm
 #'   Minus One (ENMO) values
-#' @param min_mets minimum allowable metabolic equivalent (MET) value. Values
-#'   lower than this (if any) will be rounded up to it
-#' @param vo2_floor_mlkgmin minimum allowable oxygen consumption value (in
-#'   ml/kg/min). Values lower than this (if any) will be rounded up to it
-#' @param max_mets maximum allowable metabolic equivalent (MET) value. Values
-#'   higher than this (if any) will be rounded down to it
-#' @param vo2_ceil_mlkgmin maximum allowable oxygen consumption value (in
-#'   ml/kg/min). Values higher than this (if any) will be rounded down to it
-#' @param met_mlkgmin conversion factor for transforming oxygen consumption (in
-#'   ml/kg/min) into metabolic equivalents (METs)
-#' @param RER the respiratory exchange ratio. Used for determining conversion
-#'   factors when calculating caloric expenditure from oxygen consumption
 #' @param side character vector or scalar indicating which side-specific wrist
 #'   model(s) to implement for \code{"Montoye 2017"}. Can be \code{"left"},
 #'   \code{"right"}, or \code{c("left", "right")}
-#' @param select for internal use in functions related to
-#'   \code{Staudenmayer} methods
 #' @param axis1 for \code{Sojourn 1x} and \code{Sojourn 3x}, the name of the
 #'   variable in \code{d} containing vertical axis activity counts
 #' @param axis2 for \code{Sojourn 3x}, the name of the variable in \code{d}
@@ -131,6 +135,12 @@
 #'   containing lateral axis activity counts
 #' @param vector.magnitude for \code{Sojourn 3x}, the name of the variable in
 #'   \code{d} containing vector magnitude activity counts
+#' @param met_name [for internal use] A character scalar giving the name of the
+#'   column containing metabolic equivalent values (METs)
+#' @param tag [for internal use] A character scalar giving an informative tag to
+#'   add when naming variables
+#' @param select [for internal use] A character scalar or vector indicating
+#'   which \code{Staudenmayer} model(s) to run
 #'
 #' @details This is a wrapper and aggregator for applying different energy
 #'   expenditure prediction methods. Depending on the value(s) specified in the
@@ -155,17 +165,24 @@
 #' @return A data frame appended with new columns containing energy
 #'     expenditure predictions
 #'
-#' @note Oxygen consumption values are converted to kcal using factors from the
-#'   Lusk table (by default, 4.862 kcal/L, corresponding to RER of 0.85; see
-#'   `References` below). For methods that predict oxygen consumption, the
-#'   values are converted to caloric expenditure, then to metabolic
-#'   equivalents (METs) assuming 1 MET = 1 kcal/kg/h.
+#' @note
 #'
-#'   On another note, not all methods may be able to be combined through a
-#'   single call. This capability is dependent on the desired settings and
-#'   format of the output. There are too many possibilities and contingencies to
-#'   list in a single documentation file. Options and adaptations can be
-#'   discussed on \href{https://github.com/paulhibbing/accelEE/issues}{GitHub}.
+#' Some things to be aware of:
+#'
+#' 1. Oxygen consumption values are converted to kcal using factors from the
+#' Lusk table (by default, 4.862 kcal/L, corresponding to RER of 0.85; see
+#' `References` below).
+#'
+#' 2. Not all methods can necessarily be combined through a single call.
+#' This capability is dependent on the desired settings and format of the
+#' output. There are too many possibilities and contingencies to
+#' list in a single documentation file. Options and adaptations can be
+#' discussed on \href{https://github.com/paulhibbing/accelEE/issues}{GitHub}.
+#'
+#' 3. The \code{wrap_2RM} applicator does not have a formal \code{min_mets}
+#' argument because the default minima differ depending on the method being
+#' implemented. However, you can still pass a value for \code{min_mets}, and
+#' it will get forwarded to the \code{TwoRegression} package and applied as expected.
 #'
 #' @references
 #'
@@ -194,18 +211,23 @@
 #'
 #' @seealso
 #'
-#'   Lusk, G. (1924). Analysis of the oxidation of mixtures of carbohydrate and
-#'   fat: a correction. \emph{Journal of Biological Chemistry}, 59, 41-42.
+#' Lusk, G. (1924). Analysis of the oxidation of mixtures of carbohydrate and
+#' fat: a correction. \emph{Journal of Biological Chemistry}, 59, 41-42.
 #'
-#'   \code{\link[TwoRegression]{TwoRegression}}
+#' \code{\link[TwoRegression]{TwoRegression}}
 #'
-#'   \code{\link[Sojourn]{sojourn_3x_SIP}}
+#' \code{\link[Sojourn]{sojourn_3x_SIP}}
 #'
-#'   \code{\link[Sojourn]{soj_1x_original}}
+#' \code{\link[Sojourn]{soj_1x_original}}
 #'
-#'   \code{\link[Sojourn]{soj_3x_original}}
+#' \code{\link[Sojourn]{soj_3x_original}}
 #'
 #' @examples
+#'
+#' #### Below, note the variations throughout the examples,
+#' #### showing different ways you can customize the output
+#'
+#'
 #'
 #' ## Raw acceleration examples:
 #'
@@ -249,14 +271,15 @@
 #'
 #'   data(count_data, package = "TwoRegression")
 #'
-#'   results_2rm <- accelEE(
-#'     count_data, c("Crouter 2006", "Crouter 2010"),
-#'     movement_var = "Axis1", time_var = "time"
+#'   utils::head(
+#'     accelEE(
+#'       count_data, c("Crouter 2006", "Crouter 2010"),
+#'       movement_var = "Axis1", time_var = "time"
+#'     )
 #'   )
 #'
-#'   utils::head(results_2rm)
-#'
 #' }
+#'
 #'
 #' \donttest{if (isTRUE(requireNamespace("Sojourn", quietly = TRUE))) {
 #'
@@ -289,8 +312,8 @@
 #'
 #'   utils::head(soj_results)
 #'
-#'
 #' }}
+#'
 #'
 #' @name accelEE-function
 #' @export
@@ -303,14 +326,16 @@ accelEE <- function(
     "SIP", "Sojourn 1x", "Sojourn 3x",
     "Staudenmayer Linear", "Staudenmayer Random Forest"
   ),
-  verbose = FALSE,
-  feature_calc = TRUE,
-  output_epoch = "default",
   time_var = "Timestamp",
-  shrink_output = TRUE,
+  output_epoch = "default",
   warn_high_low = TRUE,
+  met_mlkgmin = 3.5,
+  RER = 0.85,
+  feature_calc = TRUE,
+  shrink_output = TRUE,
   combine = TRUE,
   ee_vars = c("METs", "VO2", "kcal"),
+  verbose = FALSE,
   ...
 ) {
 
@@ -332,61 +357,112 @@ accelEE <- function(
     sapply(
       switch,
       "Crouter 2006" = wrap_2RM(
-        d, "Crouter 2006", verbose, feature_calc,
-        output_epoch, time_var, shrink_output,
-        warn_high_low, "Crouter06", ...
-
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, method = "Crouter 2006",
+        ..., met_name = "METs", tag = "Crouter06"
       ),
       "Crouter 2010" = wrap_2RM(
-        d, "Crouter 2010", verbose, feature_calc,
-        output_epoch, time_var, shrink_output,
-        warn_high_low, "Crouter10", ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, method = "Crouter 2010",
+        ..., met_name = "METs", tag = "Crouter10"
       ),
       "Crouter 2012" = wrap_2RM(
-        d, "Crouter 2012", verbose, feature_calc,
-        output_epoch, time_var, shrink_output,
-        warn_high_low, "Crouter12", ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, method = "Crouter 2012",
+        ..., met_name = "METs", tag = "Crouter12"
       ),
       "Hibbing 2018" = wrap_2RM(
-        d, "Hibbing 2018", verbose, feature_calc,
-        output_epoch, time_var, shrink_output,
-        warn_high_low, "Hibbing18", ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, method = "Hibbing 2018",
+        ..., met_name = "METs", tag = "Hibbing18"
       ),
       "Hildebrand Linear" = hildebrand_linear(
-        d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, warn_high_low, ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose,
+        ...
       ),
       "Hildebrand Non-Linear" = hildebrand_nonlinear(
-        d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, warn_high_low, ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose,
+        ...
       ),
       "Montoye 2017" = montoye(
-        d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, warn_high_low, ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose,
+        ...
       ),
       "SIP" = sojourn(
-        d, "SIP", verbose, output_epoch, time_var,
-        shrink_output, warn_high_low, "SIP", ...
+        d,  time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        shrink_output = shrink_output, verbose = verbose,
+        method = "SIP", ..., met_name = "METs", tag = "SIP"
       ),
       "Sojourn 1x" = sojourn(
-        d, "Sojourn 1x", verbose, output_epoch, time_var,
-        shrink_output, warn_high_low, "soj_1x", ...
+        d,  time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        shrink_output = shrink_output, verbose = verbose,
+        method = "Sojourn 1x", ..., met_name = "METs", tag = "soj_1x"
       ),
       "Sojourn 3x" = sojourn(
-        d, "Sojourn 3x", verbose, output_epoch, time_var,
-        shrink_output, warn_high_low, "soj_3x", ...
+        d,  time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        shrink_output = shrink_output, verbose = verbose,
+        method = "Sojourn 3x", ..., met_name = "METs", tag = "soj_3x"
       ),
       "Staudenmayer Linear" = staudenmayer(
-        d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, warn_high_low, "METs_lm", ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, ..., select = "METs_lm"
       ),
       "Staudenmayer Random Forest" = staudenmayer(
-        d, verbose, feature_calc, output_epoch,
-        time_var, shrink_output, warn_high_low, "METs_rf", ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, ..., select = "METs_rf"
       ),
       "Staudenmayer Both" = staudenmayer(
-        d, verbose, feature_calc, output_epoch, time_var,
-        shrink_output, warn_high_low, c("METs_lm", "METs_rf"), ...
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, ..., select = c("METs_lm", "METs_rf")
       ),
       stop(
         "Invalid value passed for `method` argument:",

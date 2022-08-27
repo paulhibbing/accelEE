@@ -16,10 +16,10 @@ montoye_features(
 )
 }
 \arguments{
-\item{d}{data frame of ActiGraph data (raw samples)}
+\item{d}{data frame of data to use for generating predictions}
 
-\item{time_var}{character. Name of the variable in \code{d} containing
-POSIX-formatted timestamp information}
+\item{time_var}{character. Name of the column containing
+POSIX-formatted timestamps}
 
 \item{x_var}{character. Name of the X-axis variable}
 

@@ -1,61 +1,3 @@
-# Exported ----------------------------------------------------------------
-
-
-#' Calculate generic features for model application
-#'
-#' @param d data frame of ActiGraph data (raw samples)
-#' @param time_var character. Name of the variable in \code{d} containing
-#'   POSIX-formatted timestamp information
-#' @param x_var character. Name of the X-axis variable
-#' @param y_var character. Name of the Y-axis variable
-#' @param z_var character. Name of the Z-axis variable
-#' @param win_width_sec desired window width for features
-#' @param ... currently unused
-#'
-#' @return A data frame of features in the specified epoch length
-#' @export
-#'
-#' @examples
-#' if (isTRUE(requireNamespace("read.gt3x"))) {
-#'
-#'   f <- system.file("extdata/TAS1H30182785_2019-09-17.gt3x", package = "read.gt3x")
-#'   d <- stats::setNames(
-#'     read.gt3x::read.gt3x(f, asDataFrame = TRUE, imputeZeroes = TRUE),
-#'     c("Timestamp", "Accelerometer_X", "Accelerometer_Y", "Accelerometer_Z")
-#'   )[1:30000, ]
-#'
-#'   utils::head(generic_features(d))
-#'
-#' }
-generic_features <- function(
-  d, time_var = "Timestamp", x_var = "Accelerometer_X",
-  y_var = "Accelerometer_Y", z_var = "Accelerometer_Z",
-  win_width_sec = 1, ...
-) {
-
-  d %T>%
-  {if ("vm" %in% names(.)) warning(
-    "Overwriting/re-calculating `vm`", call. = FALSE
-  )} %T>%
-  {if ("ENMO" %in% names(.)) warning(
-    "Overwriting/re-calculating `ENMO`", call. = FALSE
-  )} %>%
-  dplyr::mutate(
-    vm := sqrt(
-      (!!as.name(x_var))^2 +
-      (!!as.name(y_var))^2 +
-      (!!as.name(z_var))^2
-    ),
-    ENMO = pmax(vm - 1, 0)*1000
-  ) %>%
-  collapse_EE(time_var, lubridate::period(win_width_sec))
-
-}
-
-
-# Internal ----------------------------------------------------------------
-
-
 check_data_format <- function(d) {
 
   if (is.list(d) & exists("RAW", d)) {
@@ -308,7 +250,23 @@ epoch_length <- function(d, time_var = "Timestamp") {
   pmax(2) %>%
   seq(.) %>%
   {d[[time_var]][.]} %>%
-  PAutilities::epoch_length_sec(.)
+  PAutilities::epoch_length_sec(5)
+}
+
+
+get_samp_freq <- function(d, time_var) {
+  epoch_length(d, time_var) %T>%
+  {if (. >= 1) stop(
+    "Expecting raw data, but sampling frequency is >= 1 sec",
+    call. = FALSE
+  )} %>%
+  {round(1 / .)} %T>%
+  {if (. %% 10 != 0) stop(
+    "Expecting sampling frequency to be a multiple of 10 (detected: ",
+    ., ").\n  This may be a calculation bug that needs fixing",
+    " (or updating to\n  accommodate newer monitors with",
+    " different options).", call. = FALSE
+  )}
 }
 
 

@@ -1,11 +1,12 @@
 sojourn <- function(
-  d, method = c("SIP", "Sojourn 1x", "Sojourn 3x"),
-  verbose = FALSE, output_epoch = "default",
-  time_var = "Timestamp", shrink_output = TRUE, warn_high_low = TRUE,
-  tag = "", met_name = "METs", min_mets = 1, max_mets = 20,
+  d,  time_var = "Timestamp", output_epoch = "default",
+  min_mets = 1, max_mets = 20, warn_high_low = TRUE,
   met_mlkgmin = 3.5, RER = 0.85,
+  shrink_output = TRUE, verbose = FALSE,
   axis1 = "Axis1", axis2 = "Axis2", axis3 = "Axis3",
-  vector.magnitude = "Vector.Magnitude", ...
+  vector.magnitude = "Vector.Magnitude",
+  method = c("SIP", "Sojourn 1x", "Sojourn 3x"),
+  ..., met_name = "METs", tag = ""
 ) {
 
   ## Setup

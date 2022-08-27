@@ -1,20 +1,13 @@
 wrap_2RM <- function(
-  d,
+  d, time_var = "Timestamp", output_epoch = "default",
+  max_mets = 20, warn_high_low = TRUE,
+  met_mlkgmin = 3.5, RER = 0.85,
+  feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
   method = c(
-    "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018"
+    "Crouter 2006", "Crouter 2010",
+    "Crouter 2012", "Hibbing 2018"
   ),
-  verbose = FALSE,
-  feature_calc = TRUE,
-  output_epoch = "default",
-  time_var = "Timestamp",
-  shrink_output = TRUE,
-  warn_high_low = TRUE,
-  tag = "",
-  met_name = "METs",
-  max_mets = 20,
-  met_mlkgmin = 3.5,
-  RER = 0.85,
-  ...
+  ..., met_name = "METs", tag = ""
 ) {
 
 
@@ -31,6 +24,10 @@ wrap_2RM <- function(
 
     if (feature_calc & "Hibbing 2018" %in% method) {
 
+      if (verbose) cat(
+        "\n...Calculating 1-s features for the HIBBING 2018 method"
+      )
+
       d %<>% generic_features(time_var, ...)
 
     }
@@ -40,8 +37,8 @@ wrap_2RM <- function(
 
     results <-
       TwoRegression::TwoRegression(
-        d, method, verbose = FALSE,
-        time_var = time_var, ...
+        d, method, verbose = FALSE, time_var = time_var,
+        max_mets = max_mets, warn_high_low = warn_high_low, ...
       ) %>%
       dplyr::select(
         dplyr::all_of(time_var),
@@ -51,7 +48,7 @@ wrap_2RM <- function(
       ) %>%
       met_expand(
         met_name, tag, met_mlkgmin,
-        -Inf, max_mets, RER, warn_high_low
+        -Inf, Inf, RER, warn_high_low
       )
 
 

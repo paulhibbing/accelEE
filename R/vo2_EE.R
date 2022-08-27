@@ -50,12 +50,12 @@ met_expand <- function(
 
 vo2_expand <- function(
   vo2_mlkgmin, d, tag, time_var = "Timestamp",
-  vo2_floor_mlkgmin = 3, vo2_ceil_mlkgmin = 70,
-  warn_high_low = TRUE
+  min_vo2_mlkgmin = 3, max_vo2_mlkgmin = 70,
+  warn_high_low = TRUE, met_mlkgmin = 3.5, RER = 0.85
 ) {
 
   vo2_mlkgmin %<>% check_values(
-    vo2_floor_mlkgmin, vo2_ceil_mlkgmin,
+    min_vo2_mlkgmin, max_vo2_mlkgmin,
     gsub("[\\._\\-]+", " ", toupper(tag)),
     "VO2", "ml/kg/min", warn_high_low
   )
@@ -63,13 +63,11 @@ vo2_expand <- function(
   vo2_L_kgmin <- vo2_mlkgmin / 1000
 
   kcal_kgmin <-
-    PAutilities::get_kcal_vo2_conversion(0.85, "Lusk") %>%
+    PAutilities::get_kcal_vo2_conversion(RER, "Lusk") %>%
     {vo2_L_kgmin * .}
 
-  kcal_kghr <- kcal_kgmin * 60
-
   data.frame(
-    METs = kcal_kghr,
+    METs = vo2_mlkgmin / met_mlkgmin,
     kcal_kgmin = kcal_kgmin,
     vo2_mlkgmin = vo2_mlkgmin
   ) %>%
@@ -87,11 +85,17 @@ collapse_EE <- function(
   unit = "60 sec", verbose = FALSE
 ) {
 
-  if (verbose) cat("\n...Collapsing to", unit, "epochs")
+  if (verbose) cat("\n...Collapsing to", as.character(unit), "epochs")
 
-  expected <- round(
-    unit_to_sec(unit) / epoch_length(d, time_var)
-  )
+  e <- epoch_length(d, time_var)
+
+  if (e < 1) {
+    expected <- get_samp_freq(d, time_var) * unit_to_sec(unit)
+  } else{
+    expected <-
+      unit_to_sec(unit) %>%
+      {round(. / e)}
+  }
 
   d %>%
   dplyr::group_by(
@@ -106,7 +110,7 @@ collapse_EE <- function(
     warning(
       "Removing ", sum(.$n != expected),
       " incomplete epoch(s) from a file starting ",
-      as.Date(.[1, time_var]), call. = FALSE
+      as.Date(dplyr::first(.[[time_var]])), call. = FALSE
     )
   }} %>%
   dplyr::filter(n == expected) %>%
@@ -150,6 +154,8 @@ join_EE <- function(d, ee_values) {
 
 
 check_continuous <- function(d, time_var, expected) {
+
+  if (nrow(d) == 0) stop("data frame is empty")
 
   mapply(
     difftime,
