@@ -21,8 +21,10 @@
 staudenmayer_features <- function(
   d, time_var = "Timestamp", x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y", z_var = "Accelerometer_Z",
-  win_width_sec = 15, ...
+  win_width_sec = 15, verbose = FALSE, ...
 ) {
+
+  if (verbose) cat("\n...Calculating Staudenmayer features")
 
   samp_freq <- get_samp_freq(d, time_var)
 

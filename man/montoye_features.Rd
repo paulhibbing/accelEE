@@ -12,6 +12,7 @@ montoye_features(
   z_var = "Accelerometer_Z",
   side = c("left", "right"),
   win_width_sec = 30,
+  verbose = FALSE,
   ...
 )
 }
@@ -32,6 +33,8 @@ model(s) to implement for \code{"Montoye 2017"}. Can be \code{"left"},
 \code{"right"}, or \code{c("left", "right")}}
 
 \item{win_width_sec}{desired window width for features}
+
+\item{verbose}{logical. Print updates to console?}
 
 \item{...}{currently unused}
 }

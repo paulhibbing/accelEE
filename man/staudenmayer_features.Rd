@@ -11,6 +11,7 @@ staudenmayer_features(
   y_var = "Accelerometer_Y",
   z_var = "Accelerometer_Z",
   win_width_sec = 15,
+  verbose = FALSE,
   ...
 )
 }
@@ -27,6 +28,8 @@ POSIX-formatted timestamps}
 \item{z_var}{character. Name of the Z-axis variable}
 
 \item{win_width_sec}{desired window width for features}
+
+\item{verbose}{logical. Print updates to console?}
 
 \item{...}{currently unused}
 }

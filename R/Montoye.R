@@ -22,10 +22,15 @@
 montoye_features <- function(
   d, time_var = "Timestamp",  x_var = "Accelerometer_X",
   y_var = "Accelerometer_Y", z_var = "Accelerometer_Z",
-  side = c("left", "right"), win_width_sec = 30, ...
+  side = c("left", "right"), win_width_sec = 30, verbose = FALSE, ...
 ) {
 
   stopifnot(all(side %in% c("left", "right")))
+
+  if (verbose) cat(
+    "\n...Calculating Montoye features (",
+    paste(side, collapse = " and "), " side)", sep = ""
+  )
 
   expected <- get_samp_freq(d, time_var) * win_width_sec
 
