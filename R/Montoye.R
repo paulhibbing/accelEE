@@ -98,7 +98,7 @@ montoye_features <- function(
 }
 
 
-# Get predictions ---------------------------------------------------------
+# Get predictions (main function) -----------------------------------------
 
 montoye <- function(
   d, time_var = "Timestamp", output_epoch = "default",
@@ -166,6 +166,8 @@ montoye <- function(
 
 }
 
+
+# Get predictions (supporting function) -----------------------------------
 
 predict_montoye <- function(
   d, out_name, side, select, model,
