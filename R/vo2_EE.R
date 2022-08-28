@@ -85,38 +85,55 @@ collapse_EE <- function(
   unit = "60 sec", verbose = FALSE
 ) {
 
-  if (verbose) cat("\n...Collapsing to", as.character(unit), "epochs")
 
-  e <- epoch_length(d, time_var)
+  ## Set up and check epoch lengths
 
-  if (e < 1) {
-    expected <- get_samp_freq(d, time_var) * unit_to_sec(unit)
-  } else{
-    expected <-
-      unit_to_sec(unit) %>%
-      {round(. / e)}
-  }
+    e <- epoch_length(d, time_var)
 
-  d %>%
-  dplyr::group_by(
-    !!as.name(time_var) := lubridate::floor_date(!!as.name(time_var), unit)
-  ) %>%
-  dplyr::summarise(
-    dplyr::across(where(function(x) !is.numeric(x)), dplyr::first),
-    dplyr::across(where(is.numeric), mean),
-    n = dplyr::n()
-  ) %T>%
-  {if (sum(.$n != expected)>1) {
-    warning(
-      "Removing ", sum(.$n != expected),
-      " incomplete epoch(s) from a file starting ",
-      as.Date(dplyr::first(.[[time_var]])), call. = FALSE
+    s <- unit_to_sec(unit)
+
+    if (s < e) stop(
+      "Cannot collapse to a shorter epoch length",
+      " (requested conversion from ",
+      e, " sec to ", s, " sec)"
     )
-  }} %>%
-  dplyr::filter(n == expected) %>%
-  dplyr::select(-n) %>%
-  {check_continuous(., time_var, unit_to_sec(unit))} %>%
-  data.frame(stringsAsFactors = FALSE)
+
+    if (verbose & s == e) cat("\n...Formatting")
+
+    if (verbose & s > e) cat("\n...Collapsing to ", s, "-second epochs", sep = "")
+
+
+  ## Determine expected number of data points per epoch
+
+    if (e < 1) {
+      expected <- s * get_samp_freq(d, time_var)
+    } else{
+      expected <- round(s / e)
+    }
+
+
+  ## Implementation
+
+    d %>%
+    dplyr::group_by(
+      !!as.name(time_var) := lubridate::floor_date(!!as.name(time_var), unit)
+    ) %>%
+    dplyr::summarise(
+      dplyr::across(where(function(x) !is.numeric(x)), dplyr::first),
+      dplyr::across(where(is.numeric), mean),
+      n = dplyr::n()
+    ) %T>%
+    {if (sum(.$n != expected)>1) {
+      warning(
+        "Removing ", sum(.$n != expected),
+        " incomplete epoch(s) from a file starting ",
+        as.Date(dplyr::first(.[[time_var]])), call. = FALSE
+      )
+    }} %>%
+    dplyr::filter(n == expected) %>%
+    dplyr::select(-n) %>%
+    {check_continuous(., time_var, unit_to_sec(unit))} %>%
+    data.frame(stringsAsFactors = FALSE)
 
 }
 

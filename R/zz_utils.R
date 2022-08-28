@@ -78,6 +78,35 @@ is_default <- function(output_epoch) {
 }
 
 
+lookup_epoch <- function(selection, output = c("full", "max", "unique")) {
+
+  output <- match.arg(output)
+
+  e <-
+    dplyr::tibble(
+      method = c(
+        "Crouter 2006", "Crouter 2010", "Crouter 2012",
+        "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+        "Montoye 2017",
+        "SIP", "Sojourn 1x", "Sojourn 3x",
+        "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
+      ),
+      epoch = c(
+        rep(60, 3), rep(1, 3), 30, rep(1, 3), rep(15, 3)
+      )
+    ) %>%
+    dplyr::filter(method %in% selection)
+
+  switch(
+    output,
+    "full" = e,
+    "max" = max(e$epoch),
+    "unique" = unique(e$epoch)
+  )
+
+}
+
+
 get_compatible_epoch <- function(
   output_epoch, d, selection, time_var, combine
 ) {
@@ -106,20 +135,7 @@ get_compatible_epoch <- function(
 
     use_max <- FALSE
 
-    e <-
-      dplyr::tibble(
-        method = c(
-          "Crouter 2006", "Crouter 2010", "Crouter 2012",
-          "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
-          "Montoye 2017",
-          "SIP", "Sojourn 1x", "Sojourn 3x",
-          "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
-        ),
-        epoch = c(
-          rep(60, 3), rep(1, 3), 30, rep(1, 3), rep(15, 3)
-        )
-      ) %>%
-      dplyr::filter(method %in% selection)
+    e <- lookup_epoch(selection)
 
 
   ## Case 2
@@ -155,9 +171,9 @@ get_compatible_epoch <- function(
 
   ## Case 3
 
-    if (case_3) {
+    if (case_3 & dplyr::n_distinct(e$epoch) > 1) {
 
-      if (dplyr::n_distinct(e$epoch) > 1) warning(
+      warning(
         "`combine` is TRUE and `output_epoch` is \"Default\".",
         "\nThe following conflicts exist among default epoch lengths",
         "\nfor the selected methods:\n\n  ",

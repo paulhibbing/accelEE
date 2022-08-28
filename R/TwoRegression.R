@@ -15,8 +15,10 @@ wrap_2RM <- function(
 
     method <- match.arg(method)
     if (verbose) cat("\n...Getting predictions for the", method, "method")
+
     use_default <- is_default(output_epoch)
-    if (use_default) output_epoch <- "1 sec"
+    if (use_default & "Hibbing 2018" %in% method) output_epoch <- "1 sec"
+    if (use_default & !"Hibbing 2018" %in% method) output_epoch <- "60 sec"
 
 
   ## Automated feature calculation currently only applies
