@@ -28,7 +28,7 @@ montoye_features <- function(
   stopifnot(all(side %in% c("left", "right")))
 
   if (verbose) cat(
-    "\n...Calculating Montoye features (",
+    "\n...Getting Montoye features (",
     paste(side, collapse = " and "), " side)", sep = ""
   )
 
@@ -124,23 +124,20 @@ montoye <- function(
 
     stopifnot(all(side %in% c("left", "right")))
 
-    if (verbose) cat(
-      "\n...Getting predictions for the Montoye",
-      paste(side, collapse = " and "),
-      dplyr::recode(
-        length(side), "method", "methods",
-        .default = "method(s)"
-      )
-    )
-
 
   ## Main operations
 
     if (feature_calc) {
 
-      d %<>% montoye_features(time_var, side = side, ...)
+      d %<>% montoye_features(time_var, side = side, verbose = verbose, ...)
 
     }
+
+    if (verbose) cat(
+      "\n...Getting Montoye predictions (",
+      paste(side, collapse = " and "), "side)",
+      sep = ""
+    )
 
     results <-
       d %>%

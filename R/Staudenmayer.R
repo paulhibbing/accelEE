@@ -95,8 +95,17 @@ staudenmayer <- function(
 
     stopifnot(select %in% c("METs_lm", "METs_rf"))
 
+
+  ## Main operations
+
+    if (feature_calc) {
+
+      d %<>% staudenmayer_features(., time_var, verbose = verbose, ...)
+
+    }
+
     if (verbose) cat(
-      "\n...Getting predictions for the Staudenmayer",
+      "\n...Getting Staudenmayer predictions (",
       paste(
         dplyr::recode(
           unique(select), "METs_lm" = "linear",
@@ -105,19 +114,10 @@ staudenmayer <- function(
         collapse = " and "
       ),
       dplyr::recode(
-        length(select), "method", "methods",
-        .default = "method(s)"
+        length(select), "model", "models",
+        .default = "model(s)"
       )
     )
-
-
-  ## Main operations
-
-    if (feature_calc) {
-
-      d %<>% staudenmayer_features(., time_var, ...)
-
-    }
 
     results <-
       d %>%
