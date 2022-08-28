@@ -90,9 +90,11 @@ hildebrand_linear <- function(
 
   }
 
-  if (is_default(output_epoch)) return(results)
+  return_vals(
+    results, time_var,
+    output_epoch, verbose
+  )
 
-  collapse_EE(results, time_var, output_epoch, verbose)
 
 }
 
@@ -143,9 +145,10 @@ hildebrand_nonlinear <- function(
 
   }
 
-  if (is_default(output_epoch)) return(results)
-
-  collapse_EE(results, time_var, output_epoch, verbose)
+  return_vals(
+    results, time_var,
+    output_epoch, verbose
+  )
 
 }
 

@@ -101,7 +101,9 @@ lookup_epoch <- function(selection, output = c("full", "max", "unique")) {
     output,
     "full" = e,
     "max" = max(e$epoch),
-    "unique" = unique(e$epoch)
+    "unique" =
+      unique(e$epoch) %T>%
+      {stopifnot(length(.) == 1)}
   )
 
 }

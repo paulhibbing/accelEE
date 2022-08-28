@@ -493,11 +493,25 @@ accelEE <- function(
 
     if (verbose) cat("\n...Assembling output")
 
+    is_sip <- "SIP" %in% method
+
+    if (is_sip & length(method) > 1) stop(
+      "SIP cannot currently be combined",
+      " with other methods via a single call"
+    )
+
     if (is_default(output_epoch)) {
+
+      if (is_sip) time_var <- "Timestamp"
+
       output_epoch <-
-        lookup_epoch(method, "unique") %T>%
-        {stopifnot(dplyr::n_distinct(.) == 1)} %>%
+        sapply(ee_values, epoch_length, time_var) %>%
+        unique(.) %T>%
+        {stopifnot(length(.) == 1)} %>%
         lubridate::period(.)
+
+      if (is_sip) time_var <- "Time"
+
     }
 
     output <-

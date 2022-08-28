@@ -132,7 +132,6 @@ collapse_EE <- function(
     }} %>%
     dplyr::filter(n == expected) %>%
     dplyr::select(-n) %>%
-    {check_continuous(., time_var, unit_to_sec(unit))} %>%
     data.frame(stringsAsFactors = FALSE)
 
 }
@@ -176,8 +175,8 @@ check_continuous <- function(d, time_var, expected) {
 
   mapply(
     difftime,
-    d[-1, time_var],
-    d[-nrow(d), time_var],
+    d[[time_var]][-1],
+    d[[time_var]][-nrow(d)],
     MoreArgs = list(units = "sec"),
     USE.NAMES = FALSE
   ) %>%
@@ -187,5 +186,26 @@ check_continuous <- function(d, time_var, expected) {
   )}
 
   d
+
+}
+
+
+return_vals <- function(
+  results, time_var,
+  output_epoch, verbose,
+  ..., default_override = FALSE
+) {
+
+  if (is_default(output_epoch) | default_override) {
+    check_continuous(
+      results,
+      time_var,
+      epoch_length(results, time_var)
+    )
+  } else {
+    collapse_EE(results, time_var, output_epoch, verbose) %>%
+    check_continuous(time_var, unit_to_sec(output_epoch))
+  }
+
 
 }

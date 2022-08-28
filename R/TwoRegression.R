@@ -13,12 +13,17 @@ wrap_2RM <- function(
 
   ## Setup
 
-    method <- match.arg(method)
     if (verbose) cat("\n...Getting predictions for the", method, "method")
 
+    method <- match.arg(method)
+
     use_default <- is_default(output_epoch)
-    if (use_default & "Hibbing 2018" %in% method) output_epoch <- "1 sec"
-    if (use_default & !"Hibbing 2018" %in% method) output_epoch <- "60 sec"
+
+    if (use_default) {
+      output_epoch <-
+        lookup_epoch(method, "unique") %>%
+        lubridate::period(.)
+    }
 
 
   ## Automated feature calculation currently only applies
@@ -61,9 +66,10 @@ wrap_2RM <- function(
       dplyr::matches(tag)
     )
 
-    if (is_default(output_epoch)) return(results)
-
-    collapse_EE(results, time_var, output_epoch, verbose)
-
+    return_vals(
+      results, time_var,
+      output_epoch, verbose,
+      default_override = use_default
+    )
 
 }

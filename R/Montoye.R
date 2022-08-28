@@ -161,9 +161,10 @@ montoye <- function(
       !dplyr::matches("^AL_[RL]W_")
     )
 
-    if (is_default(output_epoch)) return(results)
-
-    collapse_EE(results, time_var, output_epoch, verbose)
+    return_vals(
+      results, time_var,
+      output_epoch, verbose
+    )
 
 
 }
