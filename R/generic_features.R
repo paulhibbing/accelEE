@@ -44,7 +44,10 @@ generic_features <- function(
         (!!as.name(z_var))^2
     ),
     ENMO = pmax(vm - 1, 0)*1000
-  ) %>%
-  collapse_EE(time_var, lubridate::period(win_width_sec), verbose)
+  ) %!>%
+  collapse_EE(
+    time_var, lubridate::period(win_width_sec),
+    verbose = verbose & win_width_sec != 1
+  )
 
 }
