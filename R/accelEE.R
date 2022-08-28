@@ -98,10 +98,11 @@
 #' @param feature_calc logical. Calculate features for the selected method(s)?
 #'   If \code{FALSE}, the assumption is that features have already been
 #'   calculated
-#' @param shrink_output logical. Reduce the number of columns in output
-#'   by removing calculated feature columns? This does not necessarily
-#'   have an impact for every method, and is currently most useful for the
-#'   \code{"Montoye 2017"} method
+#' @param shrink_output logical. Reduce the number of columns in output by
+#'   removing calculated feature columns? Default is \code{TRUE}. May only have
+#'   an impact on output in certain cases, particularly when setting \cr
+#'   \code{output_epoch = "default"} \verb{   } and/or \verb{   }
+#'   \code{method = c("Montoye 2017", ...)}
 #' @param combine logical. Combine results from each method into a single
 #'   data frame? If \code{TRUE} (the default), the results will all be collapsed
 #'   to a commonly-compatible epoch length, which may override
@@ -243,7 +244,7 @@
 #'     accelEE(
 #'       d, "Hibbing 2018", algorithm = 1,
 #'       site = c("Left Wrist", "Right Wrist"),
-#'       warn_high_low = FALSE
+#'       warn_high_low = FALSE, shrink_output = FALSE
 #'     )
 #'   )
 #'
@@ -363,7 +364,7 @@ accelEE <- function(
         feature_calc = feature_calc,
         shrink_output = shrink_output,
         verbose = verbose, method = "Crouter 2006",
-        ..., met_name = "METs", tag = "Crouter06"
+        ..., met_name = "METs", tag = "crouter06"
       ),
       "Crouter 2010" = wrap_2RM(
         d, time_var, output_epoch,
@@ -372,7 +373,7 @@ accelEE <- function(
         feature_calc = feature_calc,
         shrink_output = shrink_output,
         verbose = verbose, method = "Crouter 2010",
-        ..., met_name = "METs", tag = "Crouter10"
+        ..., met_name = "METs", tag = "crouter10"
       ),
       "Crouter 2012" = wrap_2RM(
         d, time_var, output_epoch,
@@ -381,7 +382,7 @@ accelEE <- function(
         feature_calc = feature_calc,
         shrink_output = shrink_output,
         verbose = verbose, method = "Crouter 2012",
-        ..., met_name = "METs", tag = "Crouter12"
+        ..., met_name = "METs", tag = "crouter12"
       ),
       "Hibbing 2018" = wrap_2RM(
         d, time_var, output_epoch,
@@ -390,7 +391,7 @@ accelEE <- function(
         feature_calc = feature_calc,
         shrink_output = shrink_output,
         verbose = verbose, method = "Hibbing 2018",
-        ..., met_name = "METs", tag = "Hibbing18"
+        ..., met_name = "METs", tag = "hibbing18"
       ),
       "Hildebrand Linear" = hildebrand_linear(
         d, time_var, output_epoch,
@@ -492,9 +493,32 @@ accelEE <- function(
 
     if (verbose) cat("\n...Assembling output")
 
+    if (is_default(output_epoch)) {
+      output_epoch <-
+        lookup_epoch(method, "unique") %T>%
+        {stopifnot(dplyr::n_distinct(.) == 1)} %>%
+        lubridate::period(.)
+    }
+
     output <-
       collapse_EE(d, time_var, output_epoch, verbose = FALSE) %>%
-      join_EE(ee_values)
+      join_EE(ee_values) %>%
+      dplyr::relocate(!dplyr::matches("^crouter06")) %>%
+      dplyr::relocate(!dplyr::matches("^crouter10")) %>%
+      dplyr::relocate(!dplyr::matches("^crouter12")) %>%
+      dplyr::relocate(!dplyr::matches("^hibbing18")) %>%
+      dplyr::relocate(!dplyr::matches(".+_hildebrand_linear_.+")) %>%
+      dplyr::relocate(!dplyr::matches("hildebrand_nonlinear$")) %>%
+      dplyr::relocate(!dplyr::matches("^montoye*left")) %>%
+      dplyr::relocate(!dplyr::matches("^montoye*right")) %>%
+      dplyr::relocate(!dplyr::matches("^SIP_")) %>%
+      dplyr::relocate(!dplyr::matches("^soj_1x")) %>%
+      dplyr::relocate(!dplyr::matches("^soj_3x")) %>%
+      dplyr::relocate(!dplyr::matches("^staudenmayer*lm")) %>%
+      dplyr::relocate(!dplyr::matches("^staudenmayer*rf")) %>%
+      dplyr::relocate(!dplyr::matches("METs?", TRUE)) %>%
+      dplyr::relocate(!dplyr::matches(("vo2_mlkgmin"))) %>%
+      dplyr::relocate(!dplyr::matches("kcal_kgmin"))
 
   }
 

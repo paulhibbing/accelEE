@@ -111,10 +111,11 @@ factors when calculating caloric expenditure from oxygen consumption}
 If \code{FALSE}, the assumption is that features have already been
 calculated}
 
-\item{shrink_output}{logical. Reduce the number of columns in output
-by removing calculated feature columns? This does not necessarily
-have an impact for every method, and is currently most useful for the
-\code{"Montoye 2017"} method}
+\item{shrink_output}{logical. Reduce the number of columns in output by
+removing calculated feature columns? Default is \code{TRUE}. May only have
+an impact on output in certain cases, particularly when setting \cr
+\code{output_epoch = "default"} \verb{   } and/or \verb{   }
+\code{method = c("Montoye 2017", ...)}}
 
 \item{combine}{logical. Combine results from each method into a single
 data frame? If \code{TRUE} (the default), the results will all be collapsed
@@ -242,7 +243,7 @@ if (isTRUE(requireNamespace("read.gt3x", quietly = TRUE))) {
     accelEE(
       d, "Hibbing 2018", algorithm = 1,
       site = c("Left Wrist", "Right Wrist"),
-      warn_high_low = FALSE
+      warn_high_low = FALSE, shrink_output = FALSE
     )
   )
 
