@@ -47,38 +47,17 @@ montoye_features <- function(
     dplyr::summarise(
       dplyr::across(
         .cols = c(X, Y, Z),
-        .fns = stats::quantile,
-        probs = 0.10,
-        .names = "AL_LW_{.col}_pTen"
-      ),
-      dplyr::across(
-        .cols = c(X, Y, Z),
-        .fns = stats::quantile,
-        probs = 0.25,
-        .names = "AL_LW_{.col}_pTwentyFive"
-      ),
-      dplyr::across(
-        .cols = c(X, Y, Z),
-        .fns = stats::quantile,
-        probs = 0.50,
-        .names = "AL_LW_{.col}_pFifty"
-      ),
-      dplyr::across(
-        .cols = c(X, Y, Z),
-        .fns = stats::quantile,
-        probs = 0.75,
-        .names = "AL_LW_{.col}_pSeventyFive"
-      ),
-      dplyr::across(
-        .cols = c(X, Y, Z),
-        .fns = stats::quantile,
-        probs = 0.90,
-        .names = "AL_LW_{.col}_pNinety"
-      ),
-      dplyr::across(
-        .cols = c(X, Y, Z),
-        .fns = auto_cov,
-        .names = "AL_LW_{.col}_cov"
+        .fns =
+          ~ .x %>%
+          stats::quantile(probs = c(0.10, 0.25, 0.50, 0.75, 0.90)) %>%
+          c(cov = auto_cov(.x)) %>%
+          matrix(nrow = 1) %>%
+          as.data.frame(.) %>%
+          stats::setNames(c(
+            "pTen", "pTwentyFive", "pFifty",
+            "pSeventyFive", "pNinety", "cov"
+          )),
+        .names = "AL_LW_{.col}"
       ),
       n = dplyr::n()
     ) %T>%
@@ -87,10 +66,11 @@ montoye_features <- function(
       " the Montoye 2017 method", call. = FALSE
     )} %>%
     dplyr::filter(n == expected) %>%
-    dplyr::select(-n)
+    dplyr::select(-n) %>%
+    tidyr::unpack(dplyr::all_of(paste0("AL_LW_", c("X", "Y", "Z"))), "_")
 
   if ("right" %in% side) d %<>%
-    stats::setNames(., gsub("^AL_LW_", "AL_RW_", names(.))) %>%
+    dplyr::rename_with(~ gsub("^AL_LW_", "AL_RW_", .x)) %>%
     dplyr::select(!dplyr::all_of(time_var)) %>%
     dplyr::bind_cols(d, .)
 
