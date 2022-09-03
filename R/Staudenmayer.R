@@ -116,7 +116,9 @@ staudenmayer <- function(
       dplyr::recode(
         length(select), "model", "models",
         .default = "model(s)"
-      )
+      ),
+      ")",
+      sep = ""
     )
 
     results <-
