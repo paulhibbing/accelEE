@@ -359,3 +359,20 @@ df_unique <- function(df) {
 auto_cov <- function(x) stats::cov(
   utils::head(x, -1), utils::tail(x, -1)
 )
+
+
+get_extension <- function(filename) {
+  gsub(".*\\.", "", filename)
+}
+
+
+test_package <- function(pkgname, ...) {
+
+  if (!requireNamespace(pkgname, quietly = TRUE)) stop(
+    "The ", sQuote(pkgname), " package must be installed",
+    " to run the ", ..., call. = FALSE
+  )
+
+  TRUE
+
+}
