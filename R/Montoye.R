@@ -70,7 +70,7 @@ montoye_features <- function(
     tidyr::unpack(dplyr::all_of(paste0("AL_LW_", c("X", "Y", "Z"))), "_")
 
   if ("right" %in% side) d %<>%
-    dplyr::rename_with(~ gsub("^AL_LW_", "AL_RW_", .x)) %>%
+    stats::setNames(., gsub("^AL_LW_", "AL_RW_", names(.))) %>%
     dplyr::select(!dplyr::all_of(time_var)) %>%
     dplyr::bind_cols(d, .)
 
