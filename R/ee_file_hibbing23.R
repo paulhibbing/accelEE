@@ -1,3 +1,5 @@
+# Main function -----------------------------------------------------------
+
 #' Run the Hibbing 2023 file preparation routine
 #'
 #' @aliases agd_hibbing23 gt3x_hibing23
@@ -9,7 +11,7 @@
 #'
 #'
 #' ## Sub-routine functions
-#' agd_hibbing23(filename, ...)
+#' agd_hibbing23(filename, verbose = FALSE, ...)
 #'
 #' @inheritParams ee_file
 #' @param verbose logical. Print updates to console?
@@ -21,7 +23,7 @@
 #'   \code{PhysActBedRest}, and \code{AGread} packages
 #'
 #' @keywords internal
-#' @name hibbing23
+#' @name hibbing23-file
 ee_file_hibbing23 <- function(filename, ...) {
 
   ext <- get_extension(filename)
@@ -39,7 +41,9 @@ ee_file_hibbing23 <- function(filename, ...) {
 }
 
 
-agd_hibbing23 <- function(filename, ...) {
+# Subroutines -------------------------------------------------------------
+
+agd_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
   stopifnot(
     get_extension(filename) == "agd",
@@ -50,6 +54,7 @@ agd_hibbing23 <- function(filename, ...) {
 
   AGread::read_agd(filename) %>%
   within({TS = Timestamp}) %>%
+  epoch_check_hibbing23_agd(verbose) %>%
 
   PhysicalActivity::wearingMarking(
     perMinuteCts = 1, TS = "Timestamp",
@@ -184,4 +189,24 @@ gt3x_hibbing23 <- function(filename, verbose = FALSE, ...) {
     )
 
 
+}
+
+
+# Helper function(s) ------------------------------------------------------
+
+epoch_check_hibbing23_agd <- function(d, verbose = FALSE) {
+  e <- epoch_length(d)
+  if (e == 60) return(d)
+  if (e > 60) stop(
+    "Cannot execute the *.agd routine (Hibbing 2023 scheme) on files",
+    " with epoch length > 60 seconds", call. = FALSE
+  )
+  if (verbose) cat("\n...Reintegrating to 60-s epochs")
+  if (!isTRUE(requireNamespace("AGread", quietly = TRUE))) {
+    stop(
+      "The AGread package is required for reintegration. Intall with",
+      " remotes::install_github(\"paulhibbing/AGread\")", call. = FALSE
+    )
+  }
+  AGread::reintegrate(d, 60)
 }

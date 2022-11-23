@@ -27,5 +27,5 @@ prior studies
   ee_file(f)
 }
 \seealso{
-\code{\link{hibbing23}}
+\code{\link{hibbing23-file}}
 }

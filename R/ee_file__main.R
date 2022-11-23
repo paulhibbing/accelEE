@@ -8,7 +8,7 @@
 #'   only option is \code{"Hibbing 2023"}.
 #' @param ... Arguments passed to sub-routine functions
 #'
-#' @seealso \code{\link{hibbing23}}
+#' @seealso \code{\link{hibbing23-file}}
 #'
 #' @return A data frame whose contents are prepared according to the
 #'   indicated scheme
