@@ -1,5 +1,5 @@
 #' Predict energy expenditure for accelerometry data
-#' @aliases wrap_2RM hildebrand_linear hildebrand_nonlinear
+#' @aliases wrap_2RM crouter15 hildebrand_linear hildebrand_nonlinear
 #'   montoye sojourn staudenmayer
 #'
 #'
@@ -32,9 +32,17 @@
 #'     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
 #'     method = c(
 #'       "Crouter 2006", "Crouter 2010",
-#'       "Crouter 2012", "Crouter 2015",
-#'       "Hibbing 2018"
+#'       "Crouter 2012", "Hibbing 2018"
 #'     ), ..., met_name = "METs", tag = ""
+#'   )
+#'
+#'   crouter15(
+#'     d, time_var = "Timestamp", output_epoch = "default",
+#'     min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+#'     met_mlkgmin = 3.5, RER = 0.85,
+#'     shrink_output = TRUE, verbose = FALSE,
+#'     model = c("VA", "VM"), movement_var = "Axis1",
+#'     ...
 #'   )
 #'
 #'   hildebrand_linear(
@@ -121,6 +129,13 @@
 #'   ml/kg/min). Values lower than this (if any) will be rounded up to it
 #' @param max_vo2_mlkgmin maximum allowable oxygen consumption value (in
 #'   ml/kg/min). Values higher than this (if any) will be rounded down to it
+#' @param model character. Can be \code{"VA"} and/or \code{"VM"}, specifying
+#'   which of the Crouter 2015 model(s) to use
+#' @param movement_var character. name of the variable(s) on which the Crouter
+#'   2015 method should be applied. Length must match the length of
+#'   \code{model}. It is assumed that the first elements of \code{movement_var}
+#'   and \code{model} will correspond with one another, and the same for the
+#'   second elements (if applicable)
 #' @param age the age group(s) of desired Hildebrand equation(s) to apply
 #' @param monitor the monitor being worn by the participant
 #' @param location the placement of the monitor on the body
@@ -387,14 +402,12 @@ accelEE <- function(
         verbose = verbose, method = "Crouter 2012",
         ..., met_name = "METs", tag = "crouter12"
       ),
-      "Crouter 2015" = wrap_2RM(
+      "Crouter 2015" = crouter15(
         d, time_var, output_epoch,
         warn_high_low = warn_high_low,
         met_mlkgmin = met_mlkgmin, RER = RER,
-        feature_calc = feature_calc,
-        shrink_output = shrink_output,
-        verbose = verbose, method = "Crouter 2015",
-        ..., met_name = "METs", tag = "crouter15"
+        shrink_output = shrink_output, verbose = verbose,
+        ...
       ),
       "Hibbing 2018" = wrap_2RM(
         d, time_var, output_epoch,

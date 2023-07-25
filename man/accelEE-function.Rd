@@ -4,6 +4,7 @@
 \alias{accelEE-function}
 \alias{accelEE}
 \alias{wrap_2RM}
+\alias{crouter15}
 \alias{hildebrand_linear}
 \alias{hildebrand_nonlinear}
 \alias{montoye}
@@ -37,9 +38,17 @@
     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
     method = c(
       "Crouter 2006", "Crouter 2010",
-      "Crouter 2012", "Crouter 2015",
-      "Hibbing 2018"
+      "Crouter 2012", "Hibbing 2018"
     ), ..., met_name = "METs", tag = ""
+  )
+
+  crouter15(
+    d, time_var = "Timestamp", output_epoch = "default",
+    min_mets = 1, max_mets = 20, warn_high_low = TRUE,
+    met_mlkgmin = 3.5, RER = 0.85,
+    shrink_output = TRUE, verbose = FALSE,
+    model = c("VA", "VM"), movement_var = "Axis1",
+    ...
   )
 
   hildebrand_linear(
@@ -142,6 +151,15 @@ ml/kg/min). Values lower than this (if any) will be rounded up to it}
 
 \item{max_vo2_mlkgmin}{maximum allowable oxygen consumption value (in
 ml/kg/min). Values higher than this (if any) will be rounded down to it}
+
+\item{model}{character. Can be \code{"VA"} and/or \code{"VM"}, specifying
+which of the Crouter 2015 model(s) to use}
+
+\item{movement_var}{character. name of the variable(s) on which the Crouter
+2015 method should be applied. Length must match the length of
+\code{model}. It is assumed that the first elements of \code{movement_var}
+and \code{model} will correspond with one another, and the same for the
+second elements (if applicable)}
 
 \item{age}{the age group(s) of desired Hildebrand equation(s) to apply}
 

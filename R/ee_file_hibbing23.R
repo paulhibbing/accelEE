@@ -54,7 +54,10 @@ agd_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
   AGread::read_agd(filename) %>%
   within({TS = Timestamp}) %>%
-  epoch_check_hibbing23_agd(verbose) %>%
+  epoch_check(
+    verbose = verbose,
+    routine_label = "*.agd routine (Hibbing 2023 scheme)"
+  ) %>%
 
   PhysicalActivity::wearingMarking(
     perMinuteCts = 1, TS = "Timestamp",
@@ -194,19 +197,30 @@ gt3x_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
 # Helper function(s) ------------------------------------------------------
 
-epoch_check_hibbing23_agd <- function(d, verbose = FALSE) {
-  e <- epoch_length(d)
-  if (e == 60) return(d)
-  if (e > 60) stop(
-    "Cannot execute the *.agd routine (Hibbing 2023 scheme) on files",
-    " with epoch length > 60 seconds", call. = FALSE
+epoch_check <- function(
+  d, time_var = "Timestamp",
+  target = 60, verbose = FALSE,
+  routine_label
+) {
+
+  e <- epoch_length(d, time_var)
+
+  if (e == target) return(d)
+
+  if (e > target) stop(
+    "Cannot execute the ", routine_label, " on files",
+    " with epoch length > ", target, " seconds", call. = FALSE
   )
-  if (verbose) cat("\n...Reintegrating to 60-s epochs")
+
+  if (verbose) cat("\n...Reintegrating to ", target, "-s epochs", sep = "")
+
   if (!isTRUE(requireNamespace("AGread", quietly = TRUE))) {
     stop(
       "The AGread package is required for reintegration. Intall with",
       " remotes::install_github(\"paulhibbing/AGread\")", call. = FALSE
     )
   }
-  AGread::reintegrate(d, 60)
+
+  AGread::reintegrate(d, target)
+
 }

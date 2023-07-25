@@ -37,4 +37,7 @@ Suggests:
     read.gt3x (>= 1.0.2)
 Remotes:
     paulhibbing/AGread,
-    paulhibbing/EE.Data
+    paulhibbing/EE.Data,
+    paulhibbing/PAutilities,
+    paulhibbing/Sojourn,
+    paulhibbing/TwoRegression
