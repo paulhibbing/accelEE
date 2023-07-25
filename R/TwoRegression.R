@@ -5,7 +5,8 @@ wrap_2RM <- function(
   feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
   method = c(
     "Crouter 2006", "Crouter 2010",
-    "Crouter 2012", "Hibbing 2018"
+    "Crouter 2012", "Crouter 2015",
+    "Hibbing 2018"
   ),
   ..., met_name = "METs", tag = ""
 ) {

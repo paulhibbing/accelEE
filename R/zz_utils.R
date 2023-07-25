@@ -43,15 +43,15 @@ check_method_format <- function(method) {
   } %T>%
   {
     if (!all(. %in% c(
-      "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
-      "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
-      "SIP", "Sojourn 1x", "Sojourn 3x",
+      "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
+      "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+      "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
       "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
     ))) stop(
       "method must be one of:\n  ", paste(dQuote(c(
-        "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
-        "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
-        "SIP", "Sojourn 1x", "Sojourn 3x",
+        "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
+        "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+        "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
         "Staudenmayer Linear", "Staudenmayer Random Forest"
       )), collapse = "\n  "),
       call. = FALSE
@@ -85,14 +85,14 @@ lookup_epoch <- function(selection, output = c("full", "max", "unique")) {
   e <-
     dplyr::tibble(
       method = c(
-        "Crouter 2006", "Crouter 2010", "Crouter 2012",
+        "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
         "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
         "Montoye 2017",
         "SIP", "Sojourn 1x", "Sojourn 3x",
         "Staudenmayer Linear", "Staudenmayer Random Forest", "Staudenmayer Both"
       ),
       epoch = c(
-        rep(60, 3), rep(1, 3), 30, rep(1, 3), rep(15, 3)
+        rep(60, 4), rep(1, 3), 30, rep(1, 3), rep(15, 3)
       )
     ) %>%
     dplyr::filter(method %in% selection)

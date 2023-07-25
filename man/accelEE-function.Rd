@@ -15,10 +15,10 @@
 
   accelEE(
     d, method = c(
-      "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
-      "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
-      "SIP", "Sojourn 1x", "Sojourn 3x", "Staudenmayer Linear",
-      "Staudenmayer Random Forest"
+      "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
+      "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+      "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
+      "Staudenmayer Linear", "Staudenmayer Random Forest"
     ), time_var = "Timestamp", output_epoch = "default",
     warn_high_low = TRUE, met_mlkgmin = 3.5, RER = 0.85,
     feature_calc = TRUE, shrink_output = TRUE, combine = TRUE,
@@ -37,7 +37,8 @@
     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
     method = c(
       "Crouter 2006", "Crouter 2010",
-      "Crouter 2012", "Hibbing 2018"
+      "Crouter 2012", "Crouter 2015",
+      "Hibbing 2018"
     ), ..., met_name = "METs", tag = ""
   )
 
@@ -322,6 +323,8 @@ if (isTRUE(requireNamespace("TwoRegression", quietly = TRUE))) {
 \href{https://pubmed.ncbi.nlm.nih.gov/20400882/}{Crouter et al. (2010)}
 
 \href{https://pubmed.ncbi.nlm.nih.gov/22143114/}{Crouter et al. (2012)}
+
+\href{https://pubmed.ncbi.nlm.nih.gov/25207928}{Crouter et al. (2015)}
 
 \href{https://pubmed.ncbi.nlm.nih.gov/29271847/}{Hibbing et al. (2018)}
 

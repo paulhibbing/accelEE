@@ -26,7 +26,7 @@ Imports:
     tree,
     TwoRegression (>= 1.0.0),
     utils
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
 Suggests: 

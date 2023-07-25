@@ -10,10 +10,10 @@
 #'
 #'   accelEE(
 #'     d, method = c(
-#'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
-#'       "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
-#'       "SIP", "Sojourn 1x", "Sojourn 3x", "Staudenmayer Linear",
-#'       "Staudenmayer Random Forest"
+#'       "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
+#'       "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+#'       "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
+#'       "Staudenmayer Linear", "Staudenmayer Random Forest"
 #'     ), time_var = "Timestamp", output_epoch = "default",
 #'     warn_high_low = TRUE, met_mlkgmin = 3.5, RER = 0.85,
 #'     feature_calc = TRUE, shrink_output = TRUE, combine = TRUE,
@@ -32,7 +32,8 @@
 #'     feature_calc = TRUE, shrink_output = TRUE, verbose = FALSE,
 #'     method = c(
 #'       "Crouter 2006", "Crouter 2010",
-#'       "Crouter 2012", "Hibbing 2018"
+#'       "Crouter 2012", "Crouter 2015",
+#'       "Hibbing 2018"
 #'     ), ..., met_name = "METs", tag = ""
 #'   )
 #'
@@ -193,6 +194,8 @@
 #'
 #' \href{https://pubmed.ncbi.nlm.nih.gov/22143114/}{Crouter et al. (2012)}
 #'
+#' \href{https://pubmed.ncbi.nlm.nih.gov/25207928}{Crouter et al. (2015)}
+#'
 #' \href{https://pubmed.ncbi.nlm.nih.gov/29271847/}{Hibbing et al. (2018)}
 #'
 #' \href{https://pubmed.ncbi.nlm.nih.gov/24887173/}{Hildebrand et al. (2014)}
@@ -322,9 +325,9 @@
 accelEE <- function(
   d,
   method = c(
-    "Crouter 2006", "Crouter 2010", "Crouter 2012", "Hibbing 2018",
-    "Hildebrand Linear", "Hildebrand Non-Linear", "Montoye 2017",
-    "SIP", "Sojourn 1x", "Sojourn 3x",
+    "Crouter 2006", "Crouter 2010", "Crouter 2012", "Crouter 2015",
+    "Hibbing 2018", "Hildebrand Linear", "Hildebrand Non-Linear",
+    "Montoye 2017", "SIP", "Sojourn 1x", "Sojourn 3x",
     "Staudenmayer Linear", "Staudenmayer Random Forest"
   ),
   time_var = "Timestamp",
@@ -383,6 +386,15 @@ accelEE <- function(
         shrink_output = shrink_output,
         verbose = verbose, method = "Crouter 2012",
         ..., met_name = "METs", tag = "crouter12"
+      ),
+      "Crouter 2015" = wrap_2RM(
+        d, time_var, output_epoch,
+        warn_high_low = warn_high_low,
+        met_mlkgmin = met_mlkgmin, RER = RER,
+        feature_calc = feature_calc,
+        shrink_output = shrink_output,
+        verbose = verbose, method = "Crouter 2015",
+        ..., met_name = "METs", tag = "crouter15"
       ),
       "Hibbing 2018" = wrap_2RM(
         d, time_var, output_epoch,
@@ -520,6 +532,7 @@ accelEE <- function(
       dplyr::relocate(!dplyr::matches("^crouter06")) %>%
       dplyr::relocate(!dplyr::matches("^crouter10")) %>%
       dplyr::relocate(!dplyr::matches("^crouter12")) %>%
+      dplyr::relocate(!dplyr::matches("^crouter15")) %>%
       dplyr::relocate(!dplyr::matches("^hibbing18")) %>%
       dplyr::relocate(!dplyr::matches(".+_hildebrand_linear_.+")) %>%
       dplyr::relocate(!dplyr::matches("hildebrand_nonlinear$")) %>%
