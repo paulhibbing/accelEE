@@ -27,7 +27,6 @@ check_values <- function(
   warn_high_low = TRUE
 ) {
 
-
   ## Setup
 
     variable <- match.arg(variable)
@@ -39,9 +38,17 @@ check_values <- function(
     }
 
 
+  ## Check for missing values
+
+    if (anyNA(x)) warning(
+      "Detected ", sum(is.na(x)), " missing value(s) for the ",
+      label, " method", call. = FALSE
+    )
+
+
   ## Check for low values
 
-    check_small <- x < minimum
+    check_small <- (x < minimum) %in% TRUE
 
     if (any(check_small)) {
 
@@ -58,7 +65,7 @@ check_values <- function(
 
   ## Check for high values
 
-    check_big <- x > maximum
+    check_big <- (x > maximum) %in% TRUE
 
     if (any(check_big)) {
 
