@@ -67,7 +67,7 @@ montoye_features <- function(
     )} %>%
     dplyr::filter(n == expected) %>%
     dplyr::select(-n) %>%
-    tidyr::unpack(dplyr::all_of(paste0("AL_LW_", c("X", "Y", "Z"))), "_")
+    tidyr::unpack(dplyr::all_of(paste0("AL_LW_", c("X", "Y", "Z"))), names_sep = "_")
 
   if ("right" %in% side) d %<>%
     stats::setNames(., gsub("^AL_LW_", "AL_RW_", names(.))) %>%
