@@ -63,7 +63,7 @@
 
 # Imports -----------------------------------------------------------------
 
-#' @import magrittr nnet randomForest
+#' @import magrittr nnet randomForest tree
 NULL
 
 #' @importFrom rlang :=

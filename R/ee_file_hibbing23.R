@@ -20,7 +20,11 @@
 #'   2023 scheme
 #'
 #' @note This routine requires the \code{PhysicalActivity},
-#'   \code{PhysActBedRest}, and \code{AGread} packages
+#'   \code{PhysActBedRest}, and \code{read.gt3x} packages. Also note that the
+#'   original Hibbing paper used a package called \code{AGread} rather than
+#'   \code{read.gt3x}, and there are some differences. \code{AGread} is
+#'   available on GitHub, but not CRAN--hence, the requirement for
+#'   \code{read.gt3x} here.
 #'
 #' @keywords internal
 #' @name hibbing23-file
@@ -43,16 +47,43 @@ ee_file_hibbing23 <- function(filename, ...) {
 
 # Subroutines -------------------------------------------------------------
 
+agd_wrap <- function(filename) {
+
+  stopifnot(
+    test_package("PhysicalActivity", "Hibbing 2023 scheme")
+  )
+
+  PhysicalActivity::readActigraph(filename) %>%
+  dplyr::rename_with(
+    ~gsub("^TimeStamp$", "Timestamp", .x) %>%
+     gsub("^axis", "Axis", .) %>%
+     gsub("^vm$", "Vector.Magnitude", .) %>%
+     gsub("^steps$", "Steps", .) %>%
+     gsub("^incline", "Inclinometer.", .) %>%
+     gsub("^lux$", "Lux", .)
+  ) %T>%
+  {stopifnot("Timestamp" %in% names(.))} %>%
+  dplyr::mutate(
+    !!as.name("Date") :=
+      strftime(Timestamp, "%m/%d/%Y", tz = lubridate::tz(Timestamp)) %>%
+      gsub("^0([0-9])", "\\1", .) %>%
+      gsub("/0([0-9])/", "/\\1/", .),
+    !!as.name("Time") := strftime(Timestamp, "%H:%M:%S", tz = lubridate::tz(Timestamp))
+  ) %>%
+  dplyr::relocate(dplyr::any_of(c("Timestamp", "Date", "Time"))) %>%
+  structure(metadata = NULL)
+
+}
+
 agd_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
   stopifnot(
     get_extension(filename) == "agd",
     test_package("PhysicalActivity", "Hibbing 2023 scheme"),
-    test_package("PhysActBedRest", "Hibbing 2023 scheme"),
-    test_package("AGread", "Hibbing 2023 scheme")
+    test_package("PhysActBedRest", "Hibbing 2023 scheme")
   )
 
-  AGread::read_agd(filename) %>%
+  agd_wrap(filename) %>%
   within({TS = Timestamp}) %>%
   epoch_check(
     verbose = verbose,
@@ -113,6 +144,37 @@ agd_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
 }
 
+gt3x_wrap <- function(filename) {
+
+  stopifnot(
+    test_package("read.gt3x", "Hibbing 2023 scheme")
+  )
+
+  d <-
+    read.gt3x::read.gt3x(
+      path = filename,
+      verbose = FALSE,
+      asDataFrame = TRUE,
+      imputeZeroes = TRUE
+    ) %T>%
+    {stopifnot(identical(names(.), c("time", "X", "Y", "Z")))} %>%
+    stats::setNames(c("Timestamp", paste0("Accelerometer_", c("X", "Y", "Z")))) %>%
+    dplyr::mutate(Timestamp = lubridate::force_tz(Timestamp, "UTC"))
+
+  remove <-
+    attributes(d) %>%
+    names(.) %>%
+    setdiff(c("names", "row.names", "class"))
+
+  for (x in remove) {
+    attr(d, x) <- NULL
+  }
+
+  attr(d, "class") <- c("RAW", "data.frame")
+
+  d
+
+}
 
 gt3x_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
@@ -121,14 +183,10 @@ gt3x_hibbing23 <- function(filename, verbose = FALSE, ...) {
 
     stopifnot(
       get_extension(filename) == "gt3x",
-      test_package("AGread", "Hibbing 2023 scheme")
+      test_package("read.gt3x", "Hibbing 2023 scheme")
     )
 
-    d <- AGread::read_gt3x(
-      filename,
-      include = "ACTIVITY2",
-      parser = "external"
-    )$RAW
+    d <- gt3x_wrap(filename)
 
 
   ## Run methods
@@ -214,13 +272,10 @@ epoch_check <- function(
 
   if (verbose) cat("\n...Reintegrating to ", target, "-s epochs", sep = "")
 
-  if (!isTRUE(requireNamespace("AGread", quietly = TRUE))) {
-    stop(
-      "The AGread package is required for reintegration. Intall with",
-      " remotes::install_github(\"paulhibbing/AGread\")", call. = FALSE
-    )
-  }
-
-  AGread::reintegrate(d, target)
+  PAutilities::reintegrate(
+    df = d,
+    target_sec = target,
+    time_var = time_var
+  )
 
 }

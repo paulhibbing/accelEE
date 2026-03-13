@@ -30,6 +30,10 @@ Run the Hibbing 2023 file preparation routine
 }
 \note{
 This routine requires the \code{PhysicalActivity},
-  \code{PhysActBedRest}, and \code{AGread} packages
+  \code{PhysActBedRest}, and \code{read.gt3x} packages. Also note that the
+  original Hibbing paper used a package called \code{AGread} rather than
+  \code{read.gt3x}, and there are some differences. \code{AGread} is
+  available on GitHub, but not CRAN--hence, the requirement for
+  \code{read.gt3x} here.
 }
 \keyword{internal}
