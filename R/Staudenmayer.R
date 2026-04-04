@@ -7,7 +7,7 @@
 #' @return Data frame containing features in the specified format
 #' @export
 #'
-#' @references \href{https://pubmed.ncbi.nlm.nih.gov/26112238/}{Staudenmayer et al. (2015)}
+#' @references Staudenmayer et al. (2015), \doi{10.1152/japplphysiol.00026.2015}
 #'
 #' @examples
 #' if (isTRUE(requireNamespace("read.gt3x"))) {
@@ -55,7 +55,7 @@ staudenmayer_features <- function(
       dplyr::first(!!as.name(time_var))
     ),
     dplyr::across(
-      c("vm", "v.ang"),
+      dplyr::all_of(c("vm", "v.ang")),
       list(mean = mean, sd = staud_sd),
       .names = "{.fn}.{.col}"
     ),

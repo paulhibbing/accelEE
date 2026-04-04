@@ -13,7 +13,7 @@ and the [TwoRegression package](https://github.com/paulhibbing/TwoRegression))
   and [2017](https://pubmed.ncbi.nlm.nih.gov/27878845/) publications by Hildebrand
   et al.)
 * Non-Linear Hildebrand (see [Ellingson et al. (2017)](https://pubmed.ncbi.nlm.nih.gov/28481750/))
-* Montoye neural networks (see [Montoye et al. (2017)](https://www.tandfonline.com/doi/abs/10.1080/1091367X.2017.1337638?journalCode=hmpe20))
+* Montoye neural networks (see [Montoye et al. (2017)](https://doi.org/10.1080/1091367X.2017.1337638))
 * Sojourn methods of [Lyden et al. (2014)](https://pubmed.ncbi.nlm.nih.gov/23860415/) and
 [Ellingson et al. (2016)](https://pubmed.ncbi.nlm.nih.gov/27015380/)
 * Staudenmayer linear model and random forest (see [Staudenmayer et al. (2015)](https://pubmed.ncbi.nlm.nih.gov/26112238/))

@@ -2,9 +2,11 @@
 #'
 #' This is a package to simplify and integrate the application of various energy
 #' expenditure models. It is a simple purpose but a powerful tool. As models
-#' proliferate, they can be added into this package and benefit from a
-#' centralized location and a single, unified framework (consistent syntax etc.)
-#' that allows for seamless and flexible use of different methods.
+#' proliferate (often in other packages), they can be added into this package's
+#' framework and ecosystem, making \code{accelEE} a hub for many spokes. By
+#' providing a centralized location for these resources and a single, unified
+#' framework (with consistent syntax etc.) the package enables seamless and
+#' flexible use of different methods.
 #'
 #' The core function is \code{accelEE}, and the \code{\link[=accelEE]{documentation page}}
 #' has extensive detail on what options and capabilities are available. Start
@@ -15,5 +17,5 @@
 #'
 #' @docType package
 #' @name accelEE-package
-#'
-NULL
+#' @keywords internal
+"_PACKAGE"

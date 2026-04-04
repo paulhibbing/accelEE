@@ -336,29 +336,29 @@ if (isTRUE(requireNamespace("TwoRegression", quietly = TRUE))) {
 
 }
 \references{
-\href{https://pubmed.ncbi.nlm.nih.gov/16322367/}{Crouter et al. (2006)}
+Crouter et al. (2006). \doi{10.1152/japplphysiol.00818.2005}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/20400882/}{Crouter et al. (2010)}
+Crouter et al. (2010). \doi{10.1249/MSS.0b013e3181c37458}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/22143114/}{Crouter et al. (2012)}
+Crouter et al. (2012), \doi{10.1249/MSS.0b013e3182447825}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/25207928}{Crouter et al. (2015)}
+Crouter et al. (2015). \doi{10.1249/MSS.0000000000000502}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/29271847/}{Hibbing et al. (2018)}
+Hibbing et al. (2018). \doi{10.1249/MSS.0000000000001532}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/24887173/}{Hildebrand et al. (2014)}
+Hildebrand et al. (2014). \doi{10.1249/MSS.0000000000000289}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/27878845/}{Hildebrand et al. (2017)}
+Hildebrand et al. (2017). \doi{10.1111/sms.12795}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/28481750/}{Ellingson et al. (2017)}
+Ellingson et al. (2017). \doi{10.1088/1361-6579/aa6d00}
 
-\href{https://www.tandfonline.com/doi/abs/10.1080/1091367X.2017.1337638?journalCode=hmpe20}{Montoye et al. (2017)}
+Montoye et al. (2017). \doi{10.1080/1091367X.2017.1337638}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/23860415/}{Lyden et al. (2014)}
+Lyden et al. (2014). \doi{10.1249/MSS.0b013e3182a42a2d}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/27015380/}{Ellingson et al. (2016)}
+Ellingson et al. (2016). \doi{10.1249/MSS.0000000000000915}
 
-\href{https://pubmed.ncbi.nlm.nih.gov/26112238/}{Staudenmayer et al. (2015)}
+Staudenmayer et al. (2015). \doi{10.1152/japplphysiol.00026.2015}
 }
 \seealso{
 Lusk, G. (1924). Analysis of the oxidation of mixtures of carbohydrate and

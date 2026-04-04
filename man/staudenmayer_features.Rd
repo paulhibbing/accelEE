@@ -50,5 +50,5 @@ if (isTRUE(requireNamespace("read.gt3x"))) {
 }
 }
 \references{
-\href{https://pubmed.ncbi.nlm.nih.gov/26112238/}{Staudenmayer et al. (2015)}
+Staudenmayer et al. (2015), \doi{10.1152/japplphysiol.00026.2015}
 }

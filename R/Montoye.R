@@ -8,7 +8,7 @@
 #' @return A dataframe of features for entry into the neural networks
 #' @export
 #'
-#' @references \href{https://www.tandfonline.com/doi/abs/10.1080/1091367X.2017.1337638?journalCode=hmpe20}{Montoye et al. (2017)}
+#' @references Montoye et al. (2017) \doi{10.1080/1091367X.2017.1337638}
 #'
 #' @examples
 #' if (isTRUE(requireNamespace("read.gt3x"))) {
