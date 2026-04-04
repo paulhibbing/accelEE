@@ -2,7 +2,7 @@
 % Please edit documentation in R/Staudenmayer.R
 \name{staudenmayer_features}
 \alias{staudenmayer_features}
-\title{Calculate features for Staudanmayer models}
+\title{Calculate features for Staudenmayer models}
 \usage{
 staudenmayer_features(
   d,
@@ -37,7 +37,7 @@ POSIX-formatted timestamps}
 Data frame containing features in the specified format
 }
 \description{
-Calculate features for Staudanmayer models
+Calculate features for Staudenmayer models
 }
 \examples{
 if (isTRUE(requireNamespace("read.gt3x"))) {

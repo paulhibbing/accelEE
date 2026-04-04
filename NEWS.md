@@ -1,3 +1,8 @@
+# accelEE 0.3.0
+
+* Initial submission to CRAN
+
+
 # accelEE 0.2.1
 
 * Tweaked `check_values` to allow NA

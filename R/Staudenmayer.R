@@ -1,6 +1,6 @@
 # Get features ------------------------------------------------------------
 
-#' Calculate features for Staudanmayer models
+#' Calculate features for Staudenmayer models
 #'
 #' @inheritParams generic_features
 #'
