@@ -4,7 +4,7 @@
   #* General ####
 
     if(getRversion() >= "2.15.1") utils::globalVariables(c(
-      ".", "Accelerometer_Z", "AG", "AL_LW_X_pTen", "AL_RW_Z_cov",
+      ".", ".x", "Accelerometer_Z", "AG", "AL_LW_X_pTen", "AL_RW_Z_cov",
       ".age", "bedrest", "Choi_is_NonWear", "Date", "days", "ENMO", "grp",
       "is_NonWear", "is_Sleep", "is_WakeWear", "is_weekend", ".location",
       "mean.vm", "method", "METs", "METs_lm", "METs_rf", ".model", "model",

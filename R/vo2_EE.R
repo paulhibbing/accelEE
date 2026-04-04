@@ -22,11 +22,12 @@ met_expand <- function(
 
     dplyr::across(
       dplyr::contains("METs"),
-      check_values,
-      minimum = min_mets, maximum = max_mets,
-      label = gsub("[\\._\\-]+", "", toupper(tag)),
-      variable = "MET", units = "MET(s)",
-      warn_high_low = warn_high_low
+      ~check_values(
+        .x, minimum = min_mets, maximum = max_mets,
+        label = gsub("[\\._\\-]+", "", toupper(tag)),
+        variable = "MET", units = "MET(s)",
+        warn_high_low = warn_high_low
+      )
     ),
 
     dplyr::across(

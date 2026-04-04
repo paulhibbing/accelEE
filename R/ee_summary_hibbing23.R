@@ -125,7 +125,7 @@
       c("Timestamp", vars) %>%
       unique(.) %>%
       d[ ,.] %>%
-      dplyr::group_by(dplyr::across("Timestamp")) %>%
+      dplyr::group_by(dplyr::pick(dplyr::all_of("Timestamp"))) %>%
       dplyr::summarise(dplyr::across(
         .fns = fun,
         .names = "{tag}{.col}"
