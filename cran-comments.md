@@ -26,6 +26,8 @@ Maintainer: 'Paul R. Hibbing <paulhibbing@gmail.com>'
 New submission
 
 Possibly misspelled words in DESCRIPTION:
-  TwoRegression (11:51)
+  Ellingson (14:8)
+  al (13:8, 14:21)
+  et (13:5, 14:18)
   
-  [This is a new submission. The possibly-misspelled word is a false positive.]
+  [This is a new submission. The possibly-misspelled words are false positives.]
