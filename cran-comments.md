@@ -1,10 +1,11 @@
-## Submission
+## Resubmission
 
-This is the initial submission of a package to assist researchers in predicting
-human energy expenditure from wearable accelerometry data. The primary component
-is an eponymous function allowing users to run their data through multiple
-models/algorithms (most of which are available in other packages) and assemble
-the outputs into a consistent format with unit conversions and so forth.
+This addresses feedback from the initial submission to CRAN. We have made the
+following changes in DESCRIPTION, per the comments from Konstanze Lauseker (2026-04-09):
+
+* Referred to packages in single quotes
+* Referenced scientific literature in the form authors (year) <DOI>
+
 
 
 ## Test environments

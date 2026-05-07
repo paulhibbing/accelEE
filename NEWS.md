@@ -1,3 +1,8 @@
+# accelEE 0.3.1
+
+* Tweaked DESCRIPTION for proper formatting of package citations and DOI references
+
+
 # accelEE 0.3.0
 
 * Initial submission to CRAN

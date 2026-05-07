@@ -1,18 +1,19 @@
 Package: accelEE
 Type: Package
 Title: Predict Energy Expenditure from Accelerometer Data
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
       person(c("Paul", "R."), "Hibbing", email = "paulhibbing@gmail.com", role = c("aut","cre")),
       person("Children's Mercy Kansas City", role = "cph")
     )
 Description: Simplifies the application of various energy expenditure models. The
     package is intended as a hub that brings together methods from a variety of
-    other, themed packages such as "Sojourn" and "TwoRegression." Several methods
-    are supported locally as well, including the Hildebrand linear method
-    (<doi:10.1249/MSS.0000000000000289>) and the Hildebrand non-linear method
-    (<doi:10.1088/1361-6579/aa6d00>). The package can combine output from different
-    methods and produce standardized output in different units.
+    other, themed packages such as 'Sojourn' and 'TwoRegression'. Several methods
+    are supported locally as well, including the linear methods of
+    Hildebrand et al. (2014) <doi:10.1249/MSS.0000000000000289> and the
+    non-linear adaptation by Ellingson et al. (2017) <doi:10.1088/1361-6579/aa6d00>.
+    The package can combine output from different methods and produce standardized
+    output in a range of units.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
