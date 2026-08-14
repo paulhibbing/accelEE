@@ -42,3 +42,5 @@ Suggests:
     PhysActBedRest (>= 1.1),
     PhysicalActivity (>= 0.2.4),
     read.gt3x (>= 1.0.2)
+Remotes:
+    paulhibbing/EE.Data@nnet-fix
