@@ -1,3 +1,8 @@
+# accelEE 0.3.2
+
+* Re-release with updated soft-dependency on `EE.Data (>= 0.2.0)` (#3)
+
+
 # accelEE 0.3.1
 
 * Tweaked DESCRIPTION for proper formatting of package citations and DOI references

@@ -1,11 +1,6 @@
 ## Resubmission
 
-This addresses feedback from the initial submission to CRAN. We have made the
-following changes in DESCRIPTION, per the comments from Konstanze Lauseker (2026-04-09):
-
-* Referred to packages in single quotes
-* Referenced scientific literature in the form authors (year) <DOI>
-
+This version of 'accelEE' is being submitted to address an earlier failure on Fedora GCC. The failure was tied to a dependency (EE.Data, v0.1.1), which has since been fixed and re-released (v0.2.0). Thus, the main change in this resubmission of 'accelEE' is to explicitly require 'EE.Data' >=0.2.0.
 
 
 ## Test environments
@@ -20,10 +15,15 @@ following changes in DESCRIPTION, per the comments from Konstanze Lauseker (2026
 0 errors | 0 warnings | 1 note
 
 
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Paul R. Hibbing <paulhibbing@gmail.com>'
-
-New submission
+* checking CRAN incoming feasibility ... [20s] NOTE (20.3s)
+  Maintainer: 'Paul R. Hibbing <paulhibbing@gmail.com>'
+   
+  New submission
+   
+  Package was archived on CRAN
+   
+  CRAN repository db overrides:
+    X-CRAN-Comment: Archived on 2026-06-29 as issues were not corrected in time.
 
 Possibly misspelled words in DESCRIPTION:
   Ellingson (14:8)

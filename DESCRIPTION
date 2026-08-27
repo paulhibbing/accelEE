@@ -1,7 +1,7 @@
 Package: accelEE
 Type: Package
-Title: Predict Energy Expenditure from Accelerometer Data
-Version: 0.3.1
+Title: Predict Energy Expenditure from Accelerometry Data
+Version: 0.3.2
 Authors@R: c(
       person(c("Paul", "R."), "Hibbing", email = "paulhibbing@gmail.com", role = c("aut","cre")),
       person("Children's Mercy Kansas City", role = "cph")
@@ -38,9 +38,7 @@ RoxygenNote: 7.3.3
 Depends: 
     R (>= 2.10)
 Suggests: 
-    EE.Data,
+    EE.Data (>= 0.2.0),
     PhysActBedRest (>= 1.1),
     PhysicalActivity (>= 0.2.4),
     read.gt3x (>= 1.0.2)
-Remotes:
-    paulhibbing/EE.Data@nnet-fix
